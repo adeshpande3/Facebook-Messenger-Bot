@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-import datetime
+from datetime import datetime
 
 def getGoogleHangoutsData():
 	# Putting all the file names in a list
@@ -110,13 +110,30 @@ def getLinkedInData():
 	return responseDictionary
 
 combinedDictionary = {}
+print 'Getting Google Hangout Data'
 combinedDictionary.update(getGoogleHangoutsData())
+print 'Getting Facebook Data'
 combinedDictionary.update(getFacebookData())
+print 'Getting LinkedIn Data'
 combinedDictionary.update(getLinkedInData())
 print 'Total len of dictionary', len(combinedDictionary)
 
 encoderFile = open('EncoderData.txt', 'w')
 decoderFile = open('DecoderData.txt', 'w')
+conversationFile = open('ConversationData.txt', 'w')
 for key,value in combinedDictionary.iteritems():
-    encoderFile.write(key)
-    decoderFile.write(value)
+	if (not key.strip() or not value.strip()):
+		# If there are empty strings
+		continue
+   	encoderFile.write(key)
+   	decoderFile.write(value)
+    # Some formatting for the conversation data file
+   	if (key.strip()[-1] != '.'):
+   	    formatedKey = key.strip() + '. '
+   	else:
+   	    formatedKey = key.strip() + ' '
+   	if (value.strip()[-1] != '.'):
+   	    formatedValue = value.strip() + '. '
+   	else:
+   	    formatedValue = value.strip() + ' '
+   	conversationFile.write(formatedKey + formatedValue)
