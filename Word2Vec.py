@@ -51,7 +51,7 @@ if (os.path.isfile('xTrain.npy') and os.path.isfile('yTrain.npy') and os.path.is
 	xTrain = np.load('xTrain.npy')
 	yTrain = np.load('yTrain.npy')
 	with open("wordList.txt", "rb") as fp:
-		allUniqueWords = pickle.load(fp)
+		wordList = pickle.load(fp)
 
 fullCorpus, datasetDictionary = cleanDataset('ConversationData.txt')
 wordList, xTrain, yTrain  = createTrainingMatrices(datasetDictionary, fullCorpus)
@@ -61,7 +61,7 @@ vocabSize = len(wordList)
 np.save('xTrain.npy', xTrain)
 np.save('yTrain.npy', yTrain)
 with open("wordList.txt", "wb") as fp: 
-	pickle.dump(allUniqueWords, fp)
+	pickle.dump(wordList, fp)
 
 sys.exit()
 
