@@ -15,6 +15,7 @@ batchSize = 32
 numNegativeSample = 64
 windowSize = 5
 numIterations = 10000
+unknownCutoff = 3
 
 def cleanDataset(filename):
 	openedFile = open(filename, 'r')
@@ -23,7 +24,14 @@ def cleanDataset(filename):
 	for line in allLines:
 	    tempStr = line.replace('\n',' ').lower()
 	    myStr += re.sub('[.!?]','', tempStr)
-	return myStr, Counter(myStr.split())
+	intermediateDict = Counter(myStr.split())
+	for word in intermediateDict:
+		numOccurences = intermediateDict[word]
+		if numOccurences <= unknownCutoff:
+			intermediateDict['<unk>'] += numOccurences
+			myStr.replace(word, '<unk>')
+			del intermediateDict[word]
+	return myStr, intermediateDict
 
 def createTrainingMatrices(dictionary, corpus):
 	allUniqueWords = dictionary.keys()	
