@@ -4,6 +4,7 @@ import re
 from collections import Counter
 import sys
 import pickle
+import os
 
 # This Word2Vec implementation is largely based on this paper
 # https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality.pdf
@@ -46,10 +47,10 @@ def getTrainingBatch():
 	labels = yTrain[num:num + batchSize]
 	return arr, labels
 
-if (os.path.isfile('xTrain.npy') and os.path.isfile('yTrain.npy') and os.path.isfile('wordList.txt'):
+if (os.path.isfile('xTrain.npy') and os.path.isfile('yTrain.npy') and os.path.isfile('wordList.txt')):
 	xTrain = np.load('xTrain.npy')
 	yTrain = np.load('yTrain.npy')
-	with open("wordList.txt", "rb") as fp: 
+	with open("wordList.txt", "rb") as fp:
 		allUniqueWords = pickle.load(fp)
 
 fullCorpus, datasetDictionary = cleanDataset('ConversationData.txt')
