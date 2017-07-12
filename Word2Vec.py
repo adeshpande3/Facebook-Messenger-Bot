@@ -15,6 +15,7 @@ batchSize = 32
 numNegativeSample = 64
 windowSize = 5
 numIterations = 10000
+unknownCutoff = 3
 
 def cleanDataset(filename):
 	openedFile = open(filename, 'r')
@@ -22,8 +23,18 @@ def cleanDataset(filename):
 	myStr = ""
 	for line in allLines:
 	    tempStr = line.replace('\n',' ').lower()
-	    myStr += re.sub('[.!?]','', tempStr)
-	return myStr, Counter(myStr.split())
+	    myStr += re.sub('([.!?])','', tempStr)
+	intermediateDict = Counter(myStr.split())
+	finalDict = Counter(myStr.split())
+	dictionarySize = len(intermediateDict)
+	for index,word in enumerate(intermediateDict):
+		print 'Finished %d/%d unique words' % (index, dictionarySize)
+		numOccurences = intermediateDict[word]
+		if numOccurences <= unknownCutoff:
+			finalDict['<unk>'] += numOccurences
+			myStr = re.sub(r'\b'+re.escape(word)+r'\b', "<unk>", myStr)
+			del finalDict[word]
+	return myStr, finalDict
 
 def createTrainingMatrices(dictionary, corpus):
 	allUniqueWords = dictionary.keys()	
@@ -31,12 +42,10 @@ def createTrainingMatrices(dictionary, corpus):
 	xTrain=[]
 	yTrain=[]
 	for i in range(len(allWords)):
-		wordsAfter = allWords[i+1:i+windowSize+1]
-		for word in wordsAfter:
-		    xTrain.append(allUniqueWords.index(allWords[i]))
-		    yTrain.append(allUniqueWords.index(word))
-		wordsBefore = allWords[max(0, i-windowSize):i]
-		for word in wordsBefore:
+		wordsAfter = allWords[i + 1:i + windowSize + 1]
+		wordsBefore = allWords[max(0, i - windowSize):i]
+		wordsAdded = wordsAfter + wordsBefore
+		for word in wordsAdded:
 		    xTrain.append(allUniqueWords.index(allWords[i]))
 		    yTrain.append(allUniqueWords.index(word))
 	return allUniqueWords, xTrain, yTrain
@@ -54,7 +63,9 @@ if (os.path.isfile('xTrain.npy') and os.path.isfile('yTrain.npy') and os.path.is
 		wordList = pickle.load(fp)
 
 fullCorpus, datasetDictionary = cleanDataset('ConversationData.txt')
+print 'Finished parsing and cleaning dataset'
 wordList, xTrain, yTrain  = createTrainingMatrices(datasetDictionary, fullCorpus)
+print 'Finished creating training matrices'
 numTrainingExamples = len(xTrain)
 vocabSize = len(wordList)
 
