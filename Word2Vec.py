@@ -24,30 +24,24 @@ def cleanDataset(filename):
 	for line in allLines:
 	    tempStr = line.replace('\n',' ').lower()
 	    myStr += re.sub('([.!?])','', tempStr)
-	intermediateDict = Counter(myStr.split())
 	finalDict = Counter(myStr.split())
-	dictionarySize = len(intermediateDict)
-	for index,word in enumerate(intermediateDict):
-		print 'Finished %d/%d unique words' % (index, dictionarySize)
-		numOccurences = intermediateDict[word]
-		if numOccurences <= unknownCutoff:
-			finalDict['<unk>'] += numOccurences
-			myStr = re.sub(r'\b'+re.escape(word)+r'\b', "<unk>", myStr)
-			del finalDict[word]
 	return myStr, finalDict
 
 def createTrainingMatrices(dictionary, corpus):
 	allUniqueWords = dictionary.keys()	
 	allWords = corpus.split()
+	numTotalWords = len(allWords)
 	xTrain=[]
 	yTrain=[]
-	for i in range(len(allWords)):
+	for i in range(numTotalWords):
+		if i % 100000 == 0:
+			print 'Finished %d/%d total words' % (i, numTotalWords)
 		wordsAfter = allWords[i + 1:i + windowSize + 1]
 		wordsBefore = allWords[max(0, i - windowSize):i]
 		wordsAdded = wordsAfter + wordsBefore
 		for word in wordsAdded:
-		    xTrain.append(allUniqueWords.index(allWords[i]))
-		    yTrain.append(allUniqueWords.index(word))
+			xTrain.append(allUniqueWords.index(allWords[i]))
+			yTrain.append(allUniqueWords.index(word))
 	return allUniqueWords, xTrain, yTrain
 
 def getTrainingBatch():
@@ -59,21 +53,23 @@ def getTrainingBatch():
 if (os.path.isfile('xTrain.npy') and os.path.isfile('yTrain.npy') and os.path.isfile('wordList.txt')):
 	xTrain = np.load('xTrain.npy')
 	yTrain = np.load('yTrain.npy')
+	print 'Finished loading training matrices'
 	with open("wordList.txt", "rb") as fp:
 		wordList = pickle.load(fp)
+	print 'Finished loading word list'
 
-fullCorpus, datasetDictionary = cleanDataset('ConversationData.txt')
-print 'Finished parsing and cleaning dataset'
-wordList, xTrain, yTrain  = createTrainingMatrices(datasetDictionary, fullCorpus)
-print 'Finished creating training matrices'
+else:
+	fullCorpus, datasetDictionary = cleanDataset('ConversationData.txt')
+	print 'Finished parsing and cleaning dataset'
+	wordList, xTrain, yTrain  = createTrainingMatrices(datasetDictionary, fullCorpus)
+	print 'Finished creating training matrices'
+	np.save('xTrain.npy', xTrain)
+	np.save('yTrain.npy', yTrain)
+	with open("wordList.txt", "wb") as fp: 
+		pickle.dump(wordList, fp)
+	
 numTrainingExamples = len(xTrain)
 vocabSize = len(wordList)
-
-np.save('xTrain.npy', xTrain)
-np.save('yTrain.npy', yTrain)
-with open("wordList.txt", "wb") as fp: 
-	pickle.dump(wordList, fp)
-
 sys.exit()
 
 sess = tf.Session()
