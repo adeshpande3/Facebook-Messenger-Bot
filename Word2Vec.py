@@ -3,6 +3,8 @@ import numpy as np
 import re
 from collections import Counter
 import sys
+import math
+from random import randint
 import pickle
 import os
 
@@ -11,11 +13,10 @@ import os
 # It's a bit old, but Word2Vec is still SOTA and relatively simple, so I'm going with it
 
 wordVecDimensions = 100
-batchSize = 32
+batchSize = 128
 numNegativeSample = 64
 windowSize = 5
-numIterations = 10000
-unknownCutoff = 3
+numIterations = 10000000
 
 def cleanDataset(filename):
 	openedFile = open(filename, 'r')
@@ -48,7 +49,7 @@ def getTrainingBatch():
 	num = randint(0,numTrainingExamples - batchSize)
 	arr = xTrain[num:num + batchSize]
 	labels = yTrain[num:num + batchSize]
-	return arr, labels
+	return arr, labels[:,np.newaxis]
 
 if (os.path.isfile('xTrain.npy') and os.path.isfile('yTrain.npy') and os.path.isfile('wordList.txt')):
 	xTrain = np.load('xTrain.npy')
@@ -70,7 +71,6 @@ else:
 	
 numTrainingExamples = len(xTrain)
 vocabSize = len(wordList)
-sys.exit()
 
 sess = tf.Session()
 embeddingMatrix = tf.Variable(tf.random_uniform([vocabSize, wordVecDimensions], -1.0, 1.0))
@@ -92,8 +92,13 @@ loss = tf.reduce_mean(
 
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=1.0).minimize(loss)
 
+sess.run(tf.global_variables_initializer())
 for i in range(numIterations):
 	trainInputs, trainLabels = getTrainingBatch()
 	_, curLoss = sess.run([optimizer, loss], feed_dict={inputs: trainInputs, outputs: trainLabels})
-	if (i % 100 == 0):
+	if (i % 10000 == 0):
 		print ('Current loss is:', curLoss)
+	if (i % 1000000 == 0 and i != 0):
+		print 'Saving the word embedding matrix'
+		embedMatrix = embeddingMatrix.eval(session=sess)
+		np.save('embeddingIteration' + str(i) + '.npy', embedMatrix)
