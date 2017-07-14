@@ -46,7 +46,7 @@ def createTrainingMatrices(dictionary, corpus):
 	return allUniqueWords, xTrain, yTrain
 
 def getTrainingBatch():
-	num = randint(0,numTrainingExamples - batchSize)
+	num = randint(0,numTrainingExamples - batchSize - 1)
 	arr = xTrain[num:num + batchSize]
 	labels = yTrain[num:num + batchSize]
 	return arr, labels[:,np.newaxis]
