@@ -91,6 +91,8 @@ loss = tf.reduce_mean(
 
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=1.0).minimize(loss)
 
+# TODO only save one embedding matrix
+
 sess.run(tf.global_variables_initializer())
 for i in range(numIterations):
 	trainInputs, trainLabels = getTrainingBatch()

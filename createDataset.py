@@ -4,6 +4,11 @@ import os
 import re
 from datetime import datetime
 
+personName = input('Enter your full name: ')
+fbData = input('Do you have Facebook data to parse through (y/n)?')
+googleData = input('Do you have Google Hangouts data to parse through (y/n)?')
+linkedInData = input('Do you have LinkedIn data to parse through (y/n)?')
+
 def getGoogleHangoutsData():
 	# Putting all the file names in a list
 	allFiles = []
@@ -22,7 +27,7 @@ def getGoogleHangoutsData():
 	   	    rightBracket = lines.find('>')
 	        
 	        # Find messages that I sent
-	   	    if (lines[leftBracket+1:rightBracket] == "Adit Deshpande"):
+	   	    if (lines[leftBracket+1:rightBracket] == personName):
 	   	        if not myMessage:
 	   	            # Want to find the first message that I send (if I send multiple in a row)
 	   	            startMessageIndex = index - 1
@@ -59,7 +64,7 @@ def getFacebookData():
 	    justMessage = lines[rightBracket:]
 	    colon = justMessage.find(':')
 	    # Find messages that I sent
-	    if (justMessage[:colon] == "Adit Deshpande"):
+	    if (justMessage[:colon] == personName):
 	        if not myMessage:
 	            # Want to find the first message that I send (if I send multiple in a row)
 	            startMessageIndex = index - 1
@@ -102,7 +107,7 @@ def getLinkedInData():
 	    otherPersonsMessage, myMessage = "",""
 	    firstMessage = True
 	    for index, row in combined.iterrows():
-	        if (row['From'] != 'Adit Deshpande'):
+	        if (row['From'] != personName):
 	            if myMessage and otherPersonsMessage:
 	                otherPersonsMessage = cleanMessage(otherPersonsMessage)
 	                myMessage = cleanMessage(myMessage)
@@ -127,14 +132,18 @@ def cleanMessage(message):
 	return cleanedMessage
 
 combinedDictionary = {}
-print 'Getting Google Hangout Data'
-combinedDictionary.update(getGoogleHangoutsData())
-print 'Getting Facebook Data'
-combinedDictionary.update(getFacebookData())
-print 'Getting LinkedIn Data'
-combinedDictionary.update(getLinkedInData())
+if (googleData == 'y'):
+	print 'Getting Google Hangout Data'
+	combinedDictionary.update(getGoogleHangoutsData())
+if (fbData == 'y'):
+	print 'Getting Facebook Data'
+	combinedDictionary.update(getFacebookData())
+if (linkedInData == 'y'):
+	print 'Getting LinkedIn Data'
+	combinedDictionary.update(getLinkedInData())
 print 'Total len of dictionary', len(combinedDictionary)
 
+print 'Saving conversation data dictionary'
 np.save('conversationDictionary.npy', combinedDictionary)
 
 conversationFile = open('ConversationData.txt', 'w')
