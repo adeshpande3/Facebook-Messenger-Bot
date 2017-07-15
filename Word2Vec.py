@@ -18,13 +18,12 @@ numNegativeSample = 64
 windowSize = 5
 numIterations = 10000000
 
-def cleanDataset(filename):
+def processDataset(filename):
 	openedFile = open(filename, 'r')
 	allLines = openedFile.readlines()
 	myStr = ""
 	for line in allLines:
-	    tempStr = line.replace('\n',' ').lower()
-	    myStr += re.sub('([.!?])','', tempStr)
+	    myStr += line
 	finalDict = Counter(myStr.split())
 	return myStr, finalDict
 
@@ -51,21 +50,21 @@ def getTrainingBatch():
 	labels = yTrain[num:num + batchSize]
 	return arr, labels[:,np.newaxis]
 
-if (os.path.isfile('xTrain.npy') and os.path.isfile('yTrain.npy') and os.path.isfile('wordList.txt')):
-	xTrain = np.load('xTrain.npy')
-	yTrain = np.load('yTrain.npy')
+if (os.path.isfile('Word2VecXTrain.npy') and os.path.isfile('Word2VecYTrain.npy') and os.path.isfile('wordList.txt')):
+	xTrain = np.load('Word2VecXTrain.npy')
+	yTrain = np.load('Word2VecYTrain.npy')
 	print 'Finished loading training matrices'
 	with open("wordList.txt", "rb") as fp:
 		wordList = pickle.load(fp)
 	print 'Finished loading word list'
 
 else:
-	fullCorpus, datasetDictionary = cleanDataset('ConversationData.txt')
+	fullCorpus, datasetDictionary = processDataset('ConversationData.txt')
 	print 'Finished parsing and cleaning dataset'
 	wordList, xTrain, yTrain  = createTrainingMatrices(datasetDictionary, fullCorpus)
 	print 'Finished creating training matrices'
-	np.save('xTrain.npy', xTrain)
-	np.save('yTrain.npy', yTrain)
+	np.save('Word2VecXTrain.npy', xTrain)
+	np.save('Word2VecYTrain.npy', yTrain)
 	with open("wordList.txt", "wb") as fp: 
 		pickle.dump(wordList, fp)
 	

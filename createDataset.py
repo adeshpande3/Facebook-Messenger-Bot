@@ -1,5 +1,7 @@
 import pandas as pd
+import numpy as np
 import os
+import re
 from datetime import datetime
 
 def getGoogleHangoutsData():
@@ -39,9 +41,11 @@ def getGoogleHangoutsData():
 	   	                currentSpeaker = currentLine[currentLine.find('<')+1:currentLine.find('>')]
 	   	            elif (currentSpeaker != currentLine[currentLine.find('<')+1:currentLine.find('>')]):
 	   	                # A different person started speaking, so now I know that the first person's message is done
+		                otherPersonsMessage = cleanMessage(otherPersonsMessage)
+		                myMessage = cleanMessage(myMessage)
 	   	                responseDictionary[otherPersonsMessage] = myMessage
 	   	                break
-	   	            otherPersonsMessage += currentLine[currentLine.find('>')+1:]
+	   	            otherPersonsMessage = currentLine[currentLine.find('>')+1:] + otherPersonsMessage
 	   	        myMessage, otherPersonsMessage, currentSpeaker = "","",""
 	return responseDictionary
 
@@ -73,9 +77,11 @@ def getFacebookData():
 	                currentSpeaker = justMessage[:colon]
 	            elif (currentSpeaker != justMessage[:colon] and otherPersonsMessage):
 	                # A different person started speaking, so now I know that the first person's message is done
+	                otherPersonsMessage = cleanMessage(otherPersonsMessage)
+	                myMessage = cleanMessage(myMessage)
 	                responseDictionary[otherPersonsMessage] = myMessage
 	                break
-	            otherPersonsMessage += justMessage[colon+2:]
+	            otherPersonsMessage = justMessage[colon+2:] + otherPersonsMessage
 	        myMessage, otherPersonsMessage, currentSpeaker = "","",""    
 	return responseDictionary
 
@@ -98,6 +104,8 @@ def getLinkedInData():
 	    for index, row in combined.iterrows():
 	        if (row['From'] != 'Adit Deshpande'):
 	            if myMessage and otherPersonsMessage:
+	                otherPersonsMessage = cleanMessage(otherPersonsMessage)
+	                myMessage = cleanMessage(myMessage)
 	                responseDictionary[otherPersonsMessage.rstrip()] = myMessage.rstrip()
 	                otherPersonsMessage, myMessage = "",""
 	            otherPersonsMessage = otherPersonsMessage + row['Content'] + " "
@@ -109,6 +117,15 @@ def getLinkedInData():
 	            myMessage = myMessage + str(row['Content']) + " "
 	return responseDictionary
 
+def cleanMessage(message):
+	# Remove new lines within message
+	cleanedMessage = message.replace('\n',' ').lower()
+	cleanedMessage = cleanedMessage.replace("\xc2\xa0", "")
+	cleanedMessage = re.sub('([.,!?])','', cleanedMessage)
+	# Remove multiple spaces in message
+	cleanedMessage = re.sub(' +',' ', cleanedMessage)
+	return cleanedMessage
+
 combinedDictionary = {}
 print 'Getting Google Hangout Data'
 combinedDictionary.update(getGoogleHangoutsData())
@@ -118,22 +135,11 @@ print 'Getting LinkedIn Data'
 combinedDictionary.update(getLinkedInData())
 print 'Total len of dictionary', len(combinedDictionary)
 
-encoderFile = open('EncoderData.txt', 'w')
-decoderFile = open('DecoderData.txt', 'w')
+np.save('conversationDictionary.npy', combinedDictionary)
+
 conversationFile = open('ConversationData.txt', 'w')
 for key,value in combinedDictionary.iteritems():
 	if (not key.strip() or not value.strip()):
 		# If there are empty strings
 		continue
-   	encoderFile.write(key)
-   	decoderFile.write(value)
-    # Some formatting for the conversation data file
-   	if (key.strip()[-1] != '.'):
-   	    formatedKey = key.strip() + '. '
-   	else:
-   	    formatedKey = key.strip() + ' '
-   	if (value.strip()[-1] != '.'):
-   	    formatedValue = value.strip() + '. '
-   	else:
-   	    formatedValue = value.strip() + ' '
-   	conversationFile.write(formatedKey + formatedValue)
+   	conversationFile.write(key.strip() + value.strip())
