@@ -12,6 +12,7 @@ In order to run these scripts, you'll need the following libraries.
 * **[TensorFlow](https://www.tensorflow.org/install/) version 1.0 or later**
 * [NumPy](https://docs.scipy.org/doc/numpy/user/install.html)
 * [Pandas](https://pandas.pydata.org/pandas-docs/stable/install.html)
+* [Sklearn](http://scikit-learn.org/stable/install.html)
 
 ## How You Can Train Your Own
 
