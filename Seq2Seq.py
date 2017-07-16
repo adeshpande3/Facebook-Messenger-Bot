@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np 
 import sys
 from random import randint
+import datetime
 from sklearn.utils import shuffle
 import pickle
 import os
@@ -61,22 +62,33 @@ def getTrainingBatch(localXTrain, localYTrain, localBatchSize, maxLen):
 		if (eosFound != (maxLen - 1)):
 			shiftedExample[eosFound+1] = padTokenIndex
 		laggedLabels.append(shiftedExample)
-	return arr, labels, laggedLabels
+	return list(arr), list(labels), laggedLabels
 
 def getTestInput(inputMessage, wList, maxLen):
-	encoderMessage = np.full((1, maxLen), wList.index('<pad>'), dtype='int32')
+	encoderMessage = np.full((maxLen), wList.index('<pad>'), dtype='int32')
 	inputSplit = inputMessage.lower().split()
 	for index,word in enumerate(inputSplit):
-		encoderMessage[0, index] = wList.index(word)
-	encoderMessage[0, index + 1] = wList.index('<EOS>')
+		encoderMessage[index] = wList.index(word)
+	encoderMessage[index + 1] = wList.index('<EOS>')
 	return encoderMessage
 
+def idsToSentence(ids, wList):
+	EOStokenIndex = wordList.index('<EOS>')
+	padTokenIndex = wordList.index('<pad>')
+	myStr = ""
+	for num in ids:
+		if (num == EOStokenIndex or num == padTokenIndex):
+			break
+		else:
+			myStr = myStr + wList[num] + " "
+	return myStr
+
 # Hyperparamters
-batchSize = 24
-maxEncoderLength = 30
+batchSize = 12
+maxEncoderLength = 15
 maxDecoderLength = maxEncoderLength
 lstmUnits = 48
-numIterations = 1001
+numIterations = 10000
 
 # Loading in all the data structures
 with open("wordList.txt", "rb") as fp:
@@ -96,6 +108,7 @@ wordVectors = np.concatenate((wordVectors,EOSVector), axis=0)
 # Need to modify the word list as well
 wordList.append('<pad>')
 wordList.append('<EOS>')
+vocabSize = vocabSize + 2
 
 if (os.path.isfile('Seq2SeqXTrain.npy') and os.path.isfile('Seq2SeqYTrain.npy')):
 	xTrain = np.load('Seq2SeqXTrain.npy')
@@ -111,52 +124,55 @@ else:
 tf.reset_default_graph()
 
 # Create the placeholders
-encoderInputs = tf.placeholder(shape=(None, maxEncoderLength), dtype=tf.int32)
-decoderLabels = tf.placeholder(shape=(None, maxDecoderLength), dtype=tf.int32)
-decoderInputs = tf.placeholder(shape=(None, maxDecoderLength), dtype=tf.int32)
-
-# Look up word vectors 
-# If nn.embedding_lookup is confusing, check out my LSTM tutorial
-# https://github.com/adeshpande3/LSTM-Sentiment-Analysis/blob/master/Oriole%20LSTM.ipynb
-encoderData = tf.nn.embedding_lookup(wordVectors,encoderInputs)
-encoderData = tf.cast(encoderData, tf.float32)
-decoderData = tf.nn.embedding_lookup(wordVectors,decoderInputs)
-decoderData = tf.cast(decoderData, tf.float32)
+encoderInputs = [tf.placeholder(tf.int32, shape=(None,)) for i in range(batchSize)]
+decoderLabels = [tf.placeholder(tf.int32, shape=(None,)) for i in range(batchSize)]
+decoderInputs = [tf.placeholder(tf.int32, shape=(None,)) for i in range(batchSize)]
+feedPrevious = tf.placeholder(tf.bool)
 
 encoderLSTM = tf.contrib.rnn.BasicLSTMCell(lstmUnits)
-encoderOutputs, encoderFinalState = tf.nn.dynamic_rnn(encoderLSTM, encoderData, dtype=tf.float32)
+decoderOutputs, decoderFinalState = tf.contrib.legacy_seq2seq.embedding_attention_seq2seq(encoderInputs, decoderInputs, encoderLSTM, 
+																		vocabSize, vocabSize, wordVecDimensions, feed_previous=feedPrevious)
 
-decoderLSTM = tf.contrib.rnn.LSTMCell(lstmUnits)
-decoderOutputs, decoderFinalState = tf.nn.dynamic_rnn(decoderLSTM, decoderData, 
-	initial_state=encoderFinalState,dtype=tf.float32)
+#decoderLogits = tf.contrib.layers.linear(decoderOutputs, vocabSize)
+decoderPrediction = tf.argmax(decoderOutputs, 2)
 
-
-decoderLogits = tf.contrib.layers.linear(decoderOutputs, vocabSize)
-decoderPrediction = tf.argmax(decoderLogits, 2)
-
-crossEntropyLoss = tf.nn.softmax_cross_entropy_with_logits(
-    labels=tf.one_hot(decoderLabels, depth=vocabSize, dtype=tf.float32),
-    logits=decoderLogits,
-)
-loss = tf.reduce_mean(crossEntropyLoss)
-optimizer = tf.train.AdamOptimizer().minimize(loss)
+lossWeights = [tf.ones_like(l, dtype=tf.float32) for l in decoderLabels]
+loss = tf.contrib.legacy_seq2seq.sequence_loss(decoderOutputs, decoderLabels, lossWeights, vocabSize)
+optimizer = tf.train.AdamOptimizer(1e-4).minimize(loss)
 
 sess = tf.Session()
 saver = tf.train.Saver()
 sess.run(tf.global_variables_initializer())
 
+#tf.summary.scalar('Loss', loss)
+#merged = tf.summary.merge_all()
+#logdir = "tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "/"
+#writer = tf.summary.FileWriter(logdir, sess.graph)
+
+zeroVector = np.zeros((maxEncoderLength), dtype='int32')
+
 for i in range(numIterations):
 	encoderTrain, decoderTargetTrain, decoderInputTrain = getTrainingBatch(xTrain, yTrain, batchSize, maxEncoderLength)
-	curLoss,_ = sess.run([loss, optimizer], feed_dict={encoderInputs: encoderTrain, decoderLabels: decoderTargetTrain,
-												decoderInputs: decoderInputTrain})
+
+	feedDict = {encoderInputs[t]: encoderTrain[t] for t in range(batchSize)}
+	feedDict.update({decoderLabels[t]: decoderTargetTrain[t] for t in range(batchSize)})
+	feedDict.update({decoderInputs[t]: decoderInputTrain[t] for t in range(batchSize)})
+	feedDict.update({feedPrevious: False})
+
+	curLoss, _, summary, pred = sess.run([loss, optimizer, merged, decoderPrediction], feed_dict=feedDict)
+	#writer.add_summary(summary, i)
 	if (i % 100 == 0):
 		print('Current loss:', curLoss, 'at iteration', i)
-	if (i % 1000 == 0 and i != 0):
-		savePath = saver.save(sess, "models/pretrained_seq2seq.ckpt", global_step=i)
+	if (i % 10 == 0 and i != 0):
+		inputVector = getTestInput("whats up hows it going bro", wordList, maxEncoderLength);
+		feedDict = {encoderInputs[t]: inputVector for t in range(batchSize)}
+		feedDict.update({decoderLabels[t]: zeroVector for t in range(batchSize)})
+		feedDict.update({decoderInputs[t]: zeroVector for t in range(batchSize)})
+		feedDict.update({feedPrevious: True})
+		ids = (sess.run(decoderPrediction, feed_dict=feedDict))[0]
+		print idsToSentence(ids, wordList)
+
+	#if (i % 1000 == 0 and i != 0):
+	#	savePath = saver.save(sess, "models/pretrained_seq2seq.ckpt", global_step=i)
 
 #saver.restore(sess, tf.train.latest_checkpoint('models'))
-iterations = 0
-for i in range(iterations):
-    inputVector = getTestInput("whats up", wordList, maxEncoderLength);
-    outputVector = getTestInput("nothing much", wordList, maxEncoderLength);
-    print (sess.run(decoderPrediction, feed_dict={encoderInputs: inputVector, decoderInputs: outputVector}))
