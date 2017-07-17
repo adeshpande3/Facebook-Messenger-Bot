@@ -50,6 +50,9 @@ def getTrainingBatch(localXTrain, localYTrain, localBatchSize, maxLen):
 	arr = localXTrain[num:num + localBatchSize]
 	labels = localYTrain[num:num + localBatchSize]
 	arr, labels = shuffle(arr, labels, random_state=0)
+	reversedList = list(arr)
+	for index,example in enumerate(reversedList):
+		reversedList[index] = list(reversed(example))
 
 	laggedLabels = []
 	EOStokenIndex = wordList.index('<EOS>')
@@ -62,14 +65,15 @@ def getTrainingBatch(localXTrain, localYTrain, localBatchSize, maxLen):
 		if (eosFound != (maxLen - 1)):
 			shiftedExample[eosFound+1] = padTokenIndex
 		laggedLabels.append(shiftedExample)
-	return list(arr), list(labels), laggedLabels
+	return reversedList, list(labels), laggedLabels
 
 def getTestInput(inputMessage, wList, maxLen):
 	encoderMessage = np.full((maxLen), wList.index('<pad>'), dtype='int32')
 	inputSplit = inputMessage.lower().split()
 	for index,word in enumerate(inputSplit):
 		encoderMessage[index] = wList.index(word)
-	encoderMessage[index + 1] = wList.index('<EOS>')
+	encoderMessage = encoderMessage[::-1]
+	#encoderMessage[index + 1] = wList.index('<EOS>')
 	return encoderMessage
 
 def idsToSentence(ids, wList):
@@ -78,7 +82,7 @@ def idsToSentence(ids, wList):
 	myStr = ""
 	for num in ids:
 		if (num == EOStokenIndex or num == padTokenIndex):
-			break
+			continue
 		else:
 			myStr = myStr + wList[num] + " "
 	return myStr
@@ -87,7 +91,8 @@ def idsToSentence(ids, wList):
 batchSize = 12
 maxEncoderLength = 15
 maxDecoderLength = maxEncoderLength
-lstmUnits = 48
+lstmUnits = 12
+numLayersLSTM = 5
 numIterations = 10000
 
 # Loading in all the data structures
@@ -129,25 +134,26 @@ decoderLabels = [tf.placeholder(tf.int32, shape=(None,)) for i in range(batchSiz
 decoderInputs = [tf.placeholder(tf.int32, shape=(None,)) for i in range(batchSize)]
 feedPrevious = tf.placeholder(tf.bool)
 
-encoderLSTM = tf.contrib.rnn.BasicLSTMCell(lstmUnits)
-decoderOutputs, decoderFinalState = tf.contrib.legacy_seq2seq.embedding_attention_seq2seq(encoderInputs, decoderInputs, encoderLSTM, 
-																		vocabSize, vocabSize, wordVecDimensions, feed_previous=feedPrevious)
+encoderLSTM = (tf.contrib.rnn.BasicLSTMCell(lstmUnits, state_is_tuple=True))
+decoderOutputs, decoderFinalState = tf.contrib.legacy_seq2seq.embedding_rnn_seq2seq(encoderInputs, decoderInputs, encoderLSTM, 
+															vocabSize, vocabSize, wordVecDimensions, feed_previous=feedPrevious)
 
-#decoderLogits = tf.contrib.layers.linear(decoderOutputs, vocabSize)
 decoderPrediction = tf.argmax(decoderOutputs, 2)
 
 lossWeights = [tf.ones_like(l, dtype=tf.float32) for l in decoderLabels]
 loss = tf.contrib.legacy_seq2seq.sequence_loss(decoderOutputs, decoderLabels, lossWeights, vocabSize)
-optimizer = tf.train.AdamOptimizer(1e-4).minimize(loss)
+optimizer = tf.train.AdamOptimizer(1e-2).minimize(loss)
 
 sess = tf.Session()
 saver = tf.train.Saver()
 sess.run(tf.global_variables_initializer())
 
-#tf.summary.scalar('Loss', loss)
-#merged = tf.summary.merge_all()
-#logdir = "tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "/"
-#writer = tf.summary.FileWriter(logdir, sess.graph)
+
+
+tf.summary.scalar('Loss', loss)
+merged = tf.summary.merge_all()
+logdir = "tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "/"
+writer = tf.summary.FileWriter(logdir, sess.graph)
 
 zeroVector = np.zeros((maxEncoderLength), dtype='int32')
 
@@ -160,7 +166,7 @@ for i in range(numIterations):
 	feedDict.update({feedPrevious: False})
 
 	curLoss, _, summary, pred = sess.run([loss, optimizer, merged, decoderPrediction], feed_dict=feedDict)
-	#writer.add_summary(summary, i)
+	writer.add_summary(summary, i)
 	if (i % 100 == 0):
 		print('Current loss:', curLoss, 'at iteration', i)
 	if (i % 10 == 0 and i != 0):
@@ -170,6 +176,7 @@ for i in range(numIterations):
 		feedDict.update({decoderInputs[t]: zeroVector for t in range(batchSize)})
 		feedDict.update({feedPrevious: True})
 		ids = (sess.run(decoderPrediction, feed_dict=feedDict))[0]
+		#print ids
 		print idsToSentence(ids, wordList)
 
 	#if (i % 1000 == 0 and i != 0):
