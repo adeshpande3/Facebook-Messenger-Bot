@@ -74,6 +74,23 @@ def getTrainingBatch(localXTrain, localYTrain, localBatchSize, maxLen):
 	laggedLabels = np.asarray(laggedLabels).T.tolist()
 	return reversedList, labels, laggedLabels
 
+def translateToSentences(inputs, wList, encoder=False):
+	EOStokenIndex = wList.index('<EOS>')
+	padTokenIndex = wList.index('<pad>')
+	numStrings = len(inputs[0])
+	numLengthOfStrings = len(inputs)
+	listOfStrings = [''] * numStrings
+	for mySet in inputs:
+		for index,num in enumerate(mySet):
+			if (num != EOStokenIndex and num != padTokenIndex):
+				if (encoder):
+					# Encodings are in reverse!
+					listOfStrings[index] = wList[num] + " " + listOfStrings[index]
+				else:
+					listOfStrings[index] = listOfStrings[index] + " " + wList[num]
+	listOfStrings = [string.strip() for string in listOfStrings]
+	return listOfStrings
+
 def getTestInput(inputMessage, wList, maxLen):
 	encoderMessage = np.full((maxLen), wList.index('<pad>'), dtype='int32')
 	inputSplit = inputMessage.lower().split()
@@ -90,24 +107,28 @@ def getTestInput(inputMessage, wList, maxLen):
 	return encoderMessageList
 
 def idsToSentence(ids, wList):
-	EOStokenIndex = wList.index('<EOS>')
-	padTokenIndex = wList.index('<pad>')
-	myStr = ""
-	for num in ids:
-		print num
-		if (num[0] == EOStokenIndex or num[0] == padTokenIndex):
-			continue
-		else:
-			myStr = myStr + wList[num[0]] + " "
-	return myStr
+    EOStokenIndex = wList.index('<EOS>')
+    padTokenIndex = wList.index('<pad>')
+    myStr = ""
+    listOfResponses=[]
+    for num in ids:
+        if (num[0] == EOStokenIndex or num[0] == padTokenIndex):
+            listOfResponses.append(myStr)
+            myStr = ""
+        else:
+            myStr = myStr + wList[num[0]] + " "
+    if myStr:
+        listOfResponses.append(myStr)
+    listOfResponses = [i for i in listOfResponses if i]
+    return listOfResponses
 
 # Hyperparamters
 batchSize = 24
 maxEncoderLength = 15
 maxDecoderLength = maxEncoderLength
-lstmUnits = 48
+lstmUnits = 224
 numLayersLSTM = 5
-numIterations = 100000
+numIterations = 250000
 
 # Loading in all the data structures
 with open("wordList.txt", "rb") as fp:
@@ -148,8 +169,8 @@ decoderLabels = [tf.placeholder(tf.int32, shape=(None,)) for i in range(maxDecod
 decoderInputs = [tf.placeholder(tf.int32, shape=(None,)) for i in range(maxDecoderLength)]
 feedPrevious = tf.placeholder(tf.bool)
 
-singleCell = tf.nn.rnn_cell.BasicLSTMCell(lstmUnits, state_is_tuple=True)
-encoderLSTM = tf.nn.rnn_cell.MultiRNNCell([singleCell]*numLayersLSTM, state_is_tuple=True)
+encoderLSTM = tf.nn.rnn_cell.BasicLSTMCell(lstmUnits, state_is_tuple=True)
+#encoderLSTM = tf.nn.rnn_cell.MultiRNNCell([singleCell]*numLayersLSTM, state_is_tuple=True)
 decoderOutputs, decoderFinalState = tf.contrib.legacy_seq2seq.embedding_rnn_seq2seq(encoderInputs, decoderInputs, encoderLSTM, 
 															vocabSize, vocabSize, lstmUnits, feed_previous=feedPrevious)
 
@@ -168,11 +189,19 @@ merged = tf.summary.merge_all()
 logdir = "tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "/"
 writer = tf.summary.FileWriter(logdir, sess.graph)
 
+encoderTestStrings = ["whats up bro",
+					"hi",
+					"hey how are you",
+					"that girl was really cute tho",
+					"fuck you bro",
+					"that dodgers game was awesome"
+					]
+
 zeroVector = np.zeros((1), dtype='int32')
 
 for i in range(numIterations):
-	encoderTrain, decoderTargetTrain, decoderInputTrain = getTrainingBatch(xTrain, yTrain, batchSize, maxEncoderLength)
 
+	encoderTrain, decoderTargetTrain, decoderInputTrain = getTrainingBatch(xTrain, yTrain, batchSize, maxEncoderLength)
 	feedDict = {encoderInputs[t]: encoderTrain[t] for t in range(maxEncoderLength)}
 	feedDict.update({decoderLabels[t]: decoderTargetTrain[t] for t in range(maxDecoderLength)})
 	feedDict.update({decoderInputs[t]: decoderInputTrain[t] for t in range(maxDecoderLength)})
@@ -180,27 +209,18 @@ for i in range(numIterations):
 
 	curLoss, _, summary, pred = sess.run([loss, optimizer, merged, decoderPrediction], feed_dict=feedDict)
 	writer.add_summary(summary, i)
-	if (i % 100 == 0):
+	if (i % 50 == 0):
 		print('Current loss:', curLoss, 'at iteration', i)
-	if (i % 50 == 0 and i != 0):
-		inputVector = getTestInput("whats up hows it going bro", wordList, maxEncoderLength);
+	if (i % 25 == 0 and i != 0):
+		num = randint(0,len(encoderTestStrings) - 1)
+		print encoderTestStrings[num]
+		inputVector = getTestInput(encoderTestStrings[num], wordList, maxEncoderLength);
 		feedDict = {encoderInputs[t]: inputVector[t] for t in range(maxEncoderLength)}
 		feedDict.update({decoderLabels[t]: zeroVector for t in range(maxDecoderLength)})
 		feedDict.update({decoderInputs[t]: zeroVector for t in range(maxDecoderLength)})
 		feedDict.update({feedPrevious: True})
 		ids = (sess.run(decoderPrediction, feed_dict=feedDict))
-		#print ids
 		print idsToSentence(ids, wordList)
 
 	if (i % 5000 == 0 and i != 0):
 		savePath = saver.save(sess, "models/pretrained_seq2seq.ckpt", global_step=i)
-
-sys.exit()
-saver.restore(sess, tf.train.latest_checkpoint('models'))
-inputVector = getTestInput("whats up hows it going bro", wordList, maxEncoderLength);
-feedDict = {encoderInputs[t]: inputVector for t in range(maxEncoderLength)}
-feedDict.update({decoderLabels[t]: zeroVector for t in range(maxDecoderLength)})
-feedDict.update({decoderInputs[t]: zeroVector for t in range(maxDecoderLength)})
-feedDict.update({feedPrevious: True})
-ids = (sess.run(decoderPrediction, feed_dict=feedDict))[0]
-print idsToSentence(ids, wordList)
