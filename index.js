@@ -33,7 +33,22 @@ app.post('/webhook/', function (req, res) {
 	    let sender = event.sender.id
 	    if (event.message && event.message.text) {
 		    let text = event.message.text
-		    sendTextMessage(sender, "This is what you said bro: " + text.substring(0, 200))
+		    let responseText = ""
+			request({
+			    url: '',
+			    method: 'POST',
+				json: {
+				    message: text.substring(0, 200)),
+				}
+			}, function(error, response, body) {
+				responseText = response.body
+				if (error) {
+				    console.log('Error sending message to Flask server: ', error)
+				} else if (response.body.error) {
+				    console.log('Error: ', response.body.error)
+			    }
+		    })
+		    sendTextMessage(sender, "This is what you said bro: " + response
 	    }
     }
     res.sendStatus(200)

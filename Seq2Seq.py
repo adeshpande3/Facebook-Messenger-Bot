@@ -126,7 +126,7 @@ def idsToSentence(ids, wList):
 batchSize = 24
 maxEncoderLength = 15
 maxDecoderLength = maxEncoderLength
-lstmUnits = 224
+lstmUnits = 32
 numLayersLSTM = 5
 numIterations = 250000
 
@@ -207,10 +207,12 @@ for i in range(numIterations):
 	feedDict.update({decoderInputs[t]: decoderInputTrain[t] for t in range(maxDecoderLength)})
 	feedDict.update({feedPrevious: False})
 
-	curLoss, _, summary, pred = sess.run([loss, optimizer, merged, decoderPrediction], feed_dict=feedDict)
-	writer.add_summary(summary, i)
+	curLoss, _, pred = sess.run([loss, optimizer, decoderPrediction], feed_dict=feedDict)
+	
 	if (i % 50 == 0):
 		print('Current loss:', curLoss, 'at iteration', i)
+		summary = sess.run(merged, feed_dict=feedDict)
+		writer.add_summary(summary, i)
 	if (i % 25 == 0 and i != 0):
 		num = randint(0,len(encoderTestStrings) - 1)
 		print encoderTestStrings[num]
