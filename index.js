@@ -35,7 +35,7 @@ app.post('/webhook/', function (req, res) {
 		    let text = event.message.text
 		    let responseText = ""
 			request({
-			    url: '',
+			    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/prediction',
 			    method: 'POST',
 				json: {
 				    message: text.substring(0, 200)),
@@ -43,12 +43,14 @@ app.post('/webhook/', function (req, res) {
 			}, function(error, response, body) {
 				responseText = response.body
 				if (error) {
+					responseText = "Some error (1)"
 				    console.log('Error sending message to Flask server: ', error)
 				} else if (response.body.error) {
 				    console.log('Error: ', response.body.error)
+				    responseText = "Some error (2)"
 			    }
 		    })
-		    sendTextMessage(sender, "This is what you said bro: " + response
+		    sendTextMessage(sender, "This is what you said bro: " + responseText)
 	    }
     }
     res.sendStatus(200)
