@@ -38,10 +38,7 @@ app.post('/webhook/', function (req, res) {
 		    
 			request({
 			    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test',
-			    method: 'POST',
-				json: {
-				    message: text.substring(0, 200),
-				}
+			    method: 'GET',
 			}, function(error, response, body) {
 				responseText = body
 				responseText2 = response.body
