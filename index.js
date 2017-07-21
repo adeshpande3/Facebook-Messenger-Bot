@@ -41,7 +41,7 @@ app.post('/webhook/', function (req, res) {
 				    message: text.substring(0, 200),
 				}
 			}, function(error, response, body) {
-				responseText = response.body
+				responseText = body
 				if (error) {
 					responseText = "Some error (1)"
 				    console.log('Error sending message to Flask server: ', error)
