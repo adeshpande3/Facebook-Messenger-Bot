@@ -126,8 +126,8 @@ def idsToSentence(ids, wList):
 batchSize = 24
 maxEncoderLength = 15
 maxDecoderLength = maxEncoderLength
-lstmUnits = 32
-numLayersLSTM = 5
+lstmUnits = 48
+numLayersLSTM = 3
 numIterations = 250000
 
 # Loading in all the data structures
@@ -169,8 +169,8 @@ decoderLabels = [tf.placeholder(tf.int32, shape=(None,)) for i in range(maxDecod
 decoderInputs = [tf.placeholder(tf.int32, shape=(None,)) for i in range(maxDecoderLength)]
 feedPrevious = tf.placeholder(tf.bool)
 
-encoderLSTM = tf.nn.rnn_cell.BasicLSTMCell(lstmUnits, state_is_tuple=True)
-#encoderLSTM = tf.nn.rnn_cell.MultiRNNCell([singleCell]*numLayersLSTM, state_is_tuple=True)
+singleCell = tf.nn.rnn_cell.BasicLSTMCell(lstmUnits, state_is_tuple=True)
+encoderLSTM = tf.nn.rnn_cell.MultiRNNCell([singleCell]*numLayersLSTM, state_is_tuple=True)
 decoderOutputs, decoderFinalState = tf.contrib.legacy_seq2seq.embedding_rnn_seq2seq(encoderInputs, decoderInputs, encoderLSTM, 
 															vocabSize, vocabSize, lstmUnits, feed_previous=feedPrevious)
 
