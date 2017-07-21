@@ -34,6 +34,7 @@ app.post('/webhook/', function (req, res) {
 	    if (event.message && event.message.text) {
 		    let text = event.message.text
 		    var responseText = ""
+		    var responseText2 = ""
 		    
 			request({
 			    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test',
@@ -43,6 +44,7 @@ app.post('/webhook/', function (req, res) {
 				}
 			}, function(error, response, body) {
 				responseText = body
+				responseText2 = response.body
 				if (error) {
 					responseText = "Some error (1)"
 				    console.log('Error sending message to Flask server: ', error)
@@ -51,7 +53,8 @@ app.post('/webhook/', function (req, res) {
 				    responseText = "Some error (2)"
 			    }
 		    })
-		    sendTextMessage(sender, "This is what you said bro (1): " + responseText)
+		    sendTextMessage(sender, responseText)
+		    sendTextMessage(sender, responseText2)
 	    }
     }
     res.sendStatus(200)
