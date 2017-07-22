@@ -47,20 +47,24 @@ const token = process.env.FB_PAGE_ACCESS_TOKEN
 function getResponse(text){
 	var responseText = ""
 	var responseText2 = ""
-	request({
-	    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test',
-	    method: 'GET',
-	    headers: {'User-Agent': 'request'},
-		json: true 
-	}, function(error, response, body) {
-		if (error || response.statusCode !== 200) {
-	      responseText = "Well Fuck"
-	    } else{
-	    	responseText = "This is supposed to work"
-			responseText2 = response.body
-	    }
-	})
-	responseText += "To"
+	request.get({
+		url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test'
+	}, function(err, res, body){
+		responseText = body
+	});
+	// request({
+	//     url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test',
+	//     method: 'GET',
+	//     headers: {'User-Agent': 'request'},
+	// 	json: true 
+	// }, function(error, response, body) {
+	// 	if (error || response.statusCode !== 200) {
+	//       responseText = "Well Fuck"
+	//     } else{
+	//     	responseText = "This is supposed to work"
+	// 		responseText2 = response.body
+	//     }
+	// })
 	return responseText
 }
 
