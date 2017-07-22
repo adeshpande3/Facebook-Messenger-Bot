@@ -41,8 +41,9 @@ app.post('/webhook/', function (req, res) {
 			    headers: {'User-Agent': 'request'},
 				json: true 
 			}, function(error, response, body) {
-				sendTextMessage(sender, typeof response)
-				sendTextMessage(sender, response.length)
+				sendTextMessage(sender, typeof response.body)
+				sendTextMessage(sender, response.body)
+				sendTextMessage(sender, response.body.length)
 			})
 	    }
     }
