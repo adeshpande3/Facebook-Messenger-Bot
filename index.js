@@ -50,7 +50,7 @@ function getResponse(text){
 	request.get({
 		url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test'
 	}, function(err, res, body){
-		responseText = body
+		responseText = res
 	});
 	// request({
 	//     url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test',
