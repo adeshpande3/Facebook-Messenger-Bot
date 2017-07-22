@@ -47,11 +47,8 @@ function getResponse(text){
 	var responseText = ""
 	var responseText2 = ""
 	request({
-	    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/prediction',
-	    method: 'POST',
-		body: {
-		    message: text
-		},
+	    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test',
+	    method: 'GET',
 		json: true 
 	}, function(error, response, body) {
 		responseText = body
