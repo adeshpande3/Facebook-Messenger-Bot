@@ -46,9 +46,9 @@ const token = process.env.FB_PAGE_ACCESS_TOKEN
 
 function getResponse(text){
 	var responseText;
-	var responseText2 = ""
+	var responseText2;
 	request.get('https://flask-server-seq2seq-chatbot.herokuapp.com/test',function(err,res,body){
-		responseText = res
+		responseText = err
 	});
 	// request({
 	//     url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test',
