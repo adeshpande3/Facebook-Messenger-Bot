@@ -48,7 +48,8 @@ function getResponse(text){
 	var responseText = ""
 	var responseText2 = ""
 	request.get({
-		url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test'
+		url: 'http://ip.jsontest.com/'
+		json: true
 	}, function(err, res, body){
 		responseText = res
 	});
