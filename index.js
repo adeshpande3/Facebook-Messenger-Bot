@@ -49,7 +49,6 @@ function getResponse(text){
 	var responseText2 = ""
 	request.get({
 		url: 'http://ip.jsontest.com/'
-		json: true
 	}, function(err, res, body){
 		responseText = res
 	});
