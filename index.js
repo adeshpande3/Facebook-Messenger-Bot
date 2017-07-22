@@ -47,9 +47,9 @@ const token = process.env.FB_PAGE_ACCESS_TOKEN
 function getResponse(text){
 	var responseText;
 	var responseText2;
-	responseText = "Shit"
 	request.get('https://flask-server-seq2seq-chatbot.herokuapp.com/test',function(err,res,body){
-		responseText = "Fuck off"
+		responseText = "Does it come here?"
+		return responseText
 	});
 	// request({
 	//     url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test',
@@ -64,7 +64,7 @@ function getResponse(text){
 	// 		responseText2 = response.body
 	//     }
 	// })
-	return responseText
+	
 }
 
 function sendTextMessage(sender, text) {
