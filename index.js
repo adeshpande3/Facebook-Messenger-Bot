@@ -34,7 +34,7 @@ app.post('/webhook/', function (req, res) {
 	    if (event.message && event.message.text) {
 		    let text = event.message.text
 		    var responseText = getResponse(text)
-		    sendTextMessage(sender, responseText.length)
+		    sendTextMessage(sender, responseText)
 		    sendTextMessage(sender, "Cmonnnn")
 	    }
     }
@@ -51,10 +51,10 @@ function getResponse(text){
 	    method: 'GET',
 		json: true 
 	}, function(error, response, body) {
-		responseText = response.statusCode.toString()
+		responseText = response
 		responseText2 = response.body
 	})
-	return responseText
+	return typeof responseText
 }
 
 function sendTextMessage(sender, text) {
