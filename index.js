@@ -33,38 +33,32 @@ app.post('/webhook/', function (req, res) {
 	    let sender = event.sender.id
 	    if (event.message && event.message.text) {
 		    let text = event.message.text
-		    var responseText = ""
-		    var responseText2 = ""
-		    
-			request({
-			    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/prediction',
-			    method: 'POST',
-				body: {
-				    "message": "Hey what is up"
-				},
-				json: true 
-			}, function(error, response, body) {
-				responseText = body
-				responseText2 = response.body
-				if (error) {
-					responseText = "Some error (1)"
-				    console.log('Error sending message to Flask server: ', error)
-				} else if (response.body.error) {
-				    console.log('Error: ', response.body.error)
-				    responseText = "Some error (2)"
-			    }
-		    })
-		    sendTextMessage(sender, typeof response)
-		    sendTextMessage(sender, typeof body)
+		    var responseText = getResponse(text)
 		    sendTextMessage(sender, responseText.length)
 		    sendTextMessage(sender, "Cmonnnn")
-		    sendTextMessage(sender, responseText2.length)
 	    }
     }
     res.sendStatus(200)
 })
 
 const token = process.env.FB_PAGE_ACCESS_TOKEN
+
+function getResponse(text){
+	var responseText = ""
+	var responseText2 = ""
+	request({
+	    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/prediction',
+	    method: 'POST',
+		body: {
+		    message: text
+		},
+		json: true 
+	}, function(error, response, body) {
+		responseText = body
+		responseText2 = response.body
+	})
+	return responseText
+}
 
 function sendTextMessage(sender, text) {
     let messageData = { text:text }
