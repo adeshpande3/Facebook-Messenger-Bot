@@ -31,7 +31,7 @@ app.post('/webhook/', function (req, res) {
     for (let i = 0; i < messaging_events.length; i++) {
 	    let event = req.body.entry[0].messaging[i]
 	    let sender = event.sender.id
-	    if (event.message && event.message.text) {
+	    if (event.message && event.message.text && sender != myID) {
 	    	let text = event.message.text
 			request({
 			    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/prediction',
