@@ -51,7 +51,7 @@ function getResponse(text){
 	    method: 'GET',
 		json: true 
 	}, function(error, response, body) {
-		responseText = body
+		responseText = response.statusCode.toString()
 		responseText2 = response.body
 	})
 	return responseText
