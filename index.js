@@ -53,8 +53,12 @@ function getResponse(text){
 	    headers: {'User-Agent': 'request'},
 		json: true 
 	}, function(error, response, body) {
-		responseText = response
-		responseText2 = response.body
+		if (error || response.statusCode !== 200) {
+	      responseText = "Well Fuck"
+	    } else{
+	    	responseText = response
+			responseText2 = response.body
+	    }
 	})
 	return responseText
 }
