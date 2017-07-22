@@ -50,6 +50,7 @@ function getResponse(text){
 	request({
 	    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test',
 	    method: 'GET',
+	    headers: {'User-Agent': 'request'},
 		json: true 
 	}, function(error, response, body) {
 		responseText = response
