@@ -32,7 +32,6 @@ app.post('/webhook/', function (req, res) {
 	    let event = req.body.entry[0].messaging[i]
 	    let sender = event.sender.id
 	    if (event.message && event.message.text) {
-
 	    	let text = event.message.text
 			request({
 			    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/prediction',
@@ -41,9 +40,7 @@ app.post('/webhook/', function (req, res) {
 			    headers: {'User-Agent': 'request'},
 				json: true 
 			}, function(error, response, body) {
-				sendTextMessage(sender, typeof response.body)
 				sendTextMessage(sender, response.body)
-				sendTextMessage(sender, response.body.length)
 			})
 	    }
     }
@@ -51,13 +48,6 @@ app.post('/webhook/', function (req, res) {
 })
 
 const token = process.env.FB_PAGE_ACCESS_TOKEN
-
-function getResponse(text){
-	var responseText2;
-
-
-	
-}
 
 function sendTextMessage(sender, text) {
     let messageData = { text:text }
