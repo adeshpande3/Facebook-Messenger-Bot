@@ -55,6 +55,7 @@ app.post('/webhook/', function (req, res) {
 			    }
 		    })
 		    sendTextMessage(sender, responseText)
+		    sendTextMessage(sender, "Cmonnnn")
 		    sendTextMessage(sender, responseText2)
 	    }
     }
