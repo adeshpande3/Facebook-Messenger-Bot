@@ -52,7 +52,7 @@ function getResponse(text){
 	    method: 'GET',
 		json: true 
 	}, function(error, response, body) {
-		responseText = error
+		responseText = response
 		responseText2 = response.body
 	})
 	return responseText
