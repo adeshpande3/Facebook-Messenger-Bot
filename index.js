@@ -60,7 +60,8 @@ function getResponse(text){
 			responseText2 = response.body
 	    }
 	})
-	return responseText
+	var responseText3 = "FUCK YOU"
+	return responseText3
 }
 
 function sendTextMessage(sender, text) {
