@@ -56,7 +56,7 @@ function getResponse(text){
 		if (error || response.statusCode !== 200) {
 	      responseText = "Well Fuck"
 	    } else{
-	    	responseText = response
+	    	responseText = "This is supposed to work"
 			responseText2 = response.body
 	    }
 	})
