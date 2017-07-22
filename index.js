@@ -48,7 +48,7 @@ function getResponse(text){
 	var responseText;
 	var responseText2;
 	request.get('https://flask-server-seq2seq-chatbot.herokuapp.com/test',function(err,res,body){
-		responseText = res.body
+		responseText = "Fuck off"
 	});
 	// request({
 	//     url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test',
