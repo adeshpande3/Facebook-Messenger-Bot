@@ -33,10 +33,12 @@ app.post('/webhook/', function (req, res) {
 	    let sender = event.sender.id
 	    if (event.message && event.message.text) {
 		    let text = event.message.text
-		    var responseText = getResponse(text)
-		    sendTextMessage(sender, typeof responseText)
-		    sendTextMessage(sender, responseText.length)
-		    sendTextMessage(sender, "Cmonnnn")
+			request.get('https://flask-server-seq2seq-chatbot.herokuapp.com/test',function(err,res,body){
+				sendTextMessage(sender, typeof res)
+			    sendTextMessage(sender, res.length)
+			    sendTextMessage(sender, "Cmonnnn")
+			});
+
 	    }
     }
     res.sendStatus(200)
@@ -46,10 +48,7 @@ const token = process.env.FB_PAGE_ACCESS_TOKEN
 
 function getResponse(text){
 	var responseText2;
-	request.get('https://flask-server-seq2seq-chatbot.herokuapp.com/test',function(err,res,body){
-		var responseText = "Does it come here?"
-		return responseText
-	});
+
 	// request({
 	//     url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test',
 	//     method: 'GET',
