@@ -32,13 +32,18 @@ app.post('/webhook/', function (req, res) {
 	    let event = req.body.entry[0].messaging[i]
 	    let sender = event.sender.id
 	    if (event.message && event.message.text) {
-		    let text = event.message.text
-			request.get('https://flask-server-seq2seq-chatbot.herokuapp.com/test',function(err,res,body){
-				sendTextMessage(sender, typeof res)
-			    sendTextMessage(sender, res.length)
-			    sendTextMessage(sender, "Cmonnnn")
-			});
 
+	    	let text = event.message.text
+			request({
+			    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/prediction',
+			    method: 'GET',
+			    body: {message: text.substring(0, 200))}
+			    headers: {'User-Agent': 'request'},
+				json: true 
+			}, function(error, response, body) {
+				sendTextMessage(sender, typeof response)
+				sendTextMessage(sender, response.length)
+			})
 	    }
     }
     res.sendStatus(200)
@@ -49,19 +54,7 @@ const token = process.env.FB_PAGE_ACCESS_TOKEN
 function getResponse(text){
 	var responseText2;
 
-	// request({
-	//     url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/test',
-	//     method: 'GET',
-	//     headers: {'User-Agent': 'request'},
-	// 	json: true 
-	// }, function(error, response, body) {
-	// 	if (error || response.statusCode !== 200) {
-	//       responseText = "Well Fuck"
-	//     } else{
-	//     	responseText = "This is supposed to work"
-	// 		responseText2 = response.body
-	//     }
-	// })
+
 	
 }
 
