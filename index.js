@@ -54,9 +54,9 @@ app.post('/webhook/', function (req, res) {
 				    responseText = "Some error (2)"
 			    }
 		    })
-		    sendTextMessage(sender, responseText)
+		    sendTextMessage(sender, typeof responseText)
 		    sendTextMessage(sender, "Cmonnnn")
-		    sendTextMessage(sender, responseText2)
+		    sendTextMessage(sender, typeof responseText2)
 	    }
     }
     res.sendStatus(200)
