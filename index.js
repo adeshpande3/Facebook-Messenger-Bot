@@ -41,7 +41,7 @@ app.post('/webhook/', function (req, res) {
 			    method: 'POST',
 				body: {
 				    message: text.substring(0, 200),
-				}
+				},
 				json: true 
 			}, function(error, response, body) {
 				responseText = body
