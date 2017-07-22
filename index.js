@@ -45,10 +45,9 @@ app.post('/webhook/', function (req, res) {
 const token = process.env.FB_PAGE_ACCESS_TOKEN
 
 function getResponse(text){
-	var responseText;
 	var responseText2;
 	request.get('https://flask-server-seq2seq-chatbot.herokuapp.com/test',function(err,res,body){
-		responseText = "Does it come here?"
+		var responseText = "Does it come here?"
 		return responseText
 	});
 	// request({
