@@ -39,7 +39,7 @@ app.post('/webhook/', function (req, res) {
 			request({
 			    url: 'https://flask-server-seq2seq-chatbot.herokuapp.com/prediction',
 			    method: 'POST',
-				json: {
+				body: {
 				    message: text.substring(0, 200),
 				}
 				json: true 
