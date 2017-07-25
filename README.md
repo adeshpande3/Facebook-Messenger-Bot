@@ -1,6 +1,6 @@
 # Facebook-Messenger-Bot
 
-The FB Messenger chatbot that I trained to talk like me. The associated [blog post](). 
+The FB Messenger chatbot that I trained to talk like me. The associated [blog post](https://adeshpande3.github.io/adeshpande3.github.io/How-I-Used-Deep-Learning-to-Train-a-Chatbot-to-Talk-Like-Me). 
 
 ## Overview
 
@@ -45,19 +45,19 @@ In order to run these scripts, you'll need the following libraries.
     ```bash
     python createDataset.py
     ```
-    You'll then be prompted to enter your name (so that the script knows who to look for), and which social media sites you have data for. This script will create a file named **conversationDictionary.npy** which is a Numpy object that contains pairs in the form of (FRIENDS_MESSAGE, YOUR RESPONSE). A file named **ConversationData.txt** will also be created. This is simply a large text file the dictionary data in a unified form. 
+    You'll then be prompted to enter your name (so that the script knows who to look for), and which social media sites you have data for. This script will create a file named **conversationDictionary.npy** which is a Numpy object that contains pairs in the form of (FRIENDS_MESSAGE, YOUR RESPONSE). A file named **conversationData.txt** will also be created. This is simply a large text file the dictionary data in a unified form. 
 
-5. Now that we have those 2 files, we can start creating our word vectors through a Word2Vec model. 
+5. Now that we have those 2 files, we can start creating our word vectors through a Word2Vec model. **(This step is optional since we won't be using the saved matrices. The Tensorflow function we see later on handles the embedding part)**
     ```bash
     python Word2Vec.py
     ```
     This will create 4 different files. **Word2VecXTrain.npy** and **Word2VecYTrain.npy** are the training matrices that Word2Vec will use. We save these in our folder, in case we need to train our Word2Vec model again with different hyperparameters. We also save **wordList.txt**, which simply contains all of the unique words in our corpus. The last file saved is **embeddingMatrix.npy**  which is a Numpy matrix that contains all of the generatedword vectors. 
 
-6. Now, we can use the embedding matrix to help us train our Seq2Seq model.
+6. Now, we can use create and train our Seq2Seq model.
     ```bash
     python Seq2Seq.py
     ```
-    This will create 2 different files. **Seq2SeqXTrain.npy** and **Seq2SeqYTrain.npy** are the training matrices that Seq2Seq will use. Again, we save these just in case we want to make changes to our model architecture, and we don't want to recompute our training set. The last file will be a .ckpt file which holds our saved Seq2Seq model. This will be used once we've created our chatbot. 
+    This will create 3 or more different files. **Seq2SeqXTrain.npy** and **Seq2SeqYTrain.npy** are the training matrices that Seq2Seq will use. Again, we save these just in case we want to make changes to our model architecture, and we don't want to recompute our training set. The last file(s) will be .ckpt files which holds our saved Seq2Seq model. Models will be saved at different time periods in the training loop. These will be used and deployed once we've created our chatbot. 
 
 7. Now that we have a saved model, let's now create our Facebook chatbot. To do so, I'd recommend following this [tutorial](https://github.com/jw84/messenger-bot-tutorial). You don't need to read anything beneath the "Customize what the bot says" section. Our Seq2Seq model will handle that part. **IMPORTANT - The tutorial will tell you to create a new folder where the Node project will lie. Keep in mind this folder will be different from our folder (We'll be moving files later).** The tutorial itself should be sufficient, but here's a summary of the steps. 
 
@@ -69,14 +69,14 @@ In order to run these scripts, you'll need the following libraries.
 
     ![](Images/DefaultChatbotResponse.png)
 
-8. Ah, you're almost done! Now, we just have to edit the index.js file located in your Node project folder (The folder you created in the tutorial). You can just copy this [index.js](https://github.com/adeshpande3/Facebook-Messenger-Bot/blob/master/index.js) file over, and overwrite. This updated code will load the model into our server code, feed all of the bot's received messages into the model, and render the model's output back to the user. 
+8. Ah, you're almost done! Now, we have to create a Flask server where we can deploy our saved Seq2Seq model. I have the code for that server [here](https://github.com/adeshpande3/Chatbot-Flask-Server). Let's talk about the general structure. Flask servers normally have one main .py file where you define all of the endpoints. This will be [app.py](https://github.com/adeshpande3/Chatbot-Flask-Server/blob/master/app.py) in our case. This whill be where we load in our model. You should create a folder called 'models', and fill it with 4 files (a checkpoint file, a data file, an index file, and a meta file). These are the files that get created when you save a Tensorflow model. 
 
-There ya go. You should be able to send messages to the chatbot, and see some interesting responses that (hopefully) resemble yourelf in some way
+![](Images/Models.png)
 
-## This Chabot is Too Cool 
+In this app.py file, we want to create a route (/prediction in my case) where the input to the route will be fed into our saved model, and the decoder output is the string that is returned. Go ahead and take a closer look at app.py if that's still a bit confusing. Now that you have your app.py and your models (and other helper files if you need them), you can deploy your server. We'll be using Heroku again. There are a lot of different tutorials on deploying Flask servers to Heroku, but I like [this one](https://coderwall.com/p/pstm1w/deploying-a-flask-app-at-heroku) in particular (Don't need the Foreman and Logging sections). 
 
-insert screenshots of chabot responding well 
+9. Once you have your Flask server deployed, you'll need to edit your index.js file so that the Express app can communicate with your Flask server. Basically, you'll need to send a POST request to the Flask server with the input message that your chatbot receives, receive the output, and then use the sendTextMessage function to have the chatbot respond to the message. If you've cloned my repository, all you really need to do is replace the URL of the request function call with the URL of your own server. 
 
-## Well This is Awk
+There ya go. You should be able to send messages to the chatbot, and see some interesting responses that (hopefully) resemble yourelf in some way.
 
-insert screenshots of chabot responding poorly 
+**Please let me know if you have any issues or if you have any suggestions for making this tutorial better.**
