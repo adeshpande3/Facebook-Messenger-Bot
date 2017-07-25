@@ -59,7 +59,7 @@ In order to run these scripts, you'll need the following libraries.
     ```
     This will create 3 or more different files. **Seq2SeqXTrain.npy** and **Seq2SeqYTrain.npy** are the training matrices that Seq2Seq will use. Again, we save these just in case we want to make changes to our model architecture, and we don't want to recompute our training set. The last file(s) will be .ckpt files which holds our saved Seq2Seq model. Models will be saved at different time periods in the training loop. These will be used and deployed once we've created our chatbot. 
 
-7. Now that we have a saved model, let's now create our Facebook chatbot. To do so, I'd recommend following this [tutorial](https://github.com/jw84/messenger-bot-tutorial). You don't need to read anything beneath the "Customize what the bot says" section. Our Seq2Seq model will handle that part. **IMPORTANT - The tutorial will tell you to create a new folder where the Node project will lie. Keep in mind this folder will be different from our folder (We'll be moving files later).** The tutorial itself should be sufficient, but here's a summary of the steps. 
+7. Now that we have a saved model, let's now create our Facebook chatbot. To do so, I'd recommend following this [tutorial](https://github.com/jw84/messenger-bot-tutorial). You don't need to read anything beneath the "Customize what the bot says" section. Our Seq2Seq model will handle that part. **IMPORTANT - The tutorial will tell you to create a new folder where the Node project will lie.** Keep in mind this folder will be different from our folder. You can think of this folder as being where our data preprocessing and model training lie, while the other folder is strictly reserved for the Express app. The tutorial itself should be sufficient, but here's a summary of the steps. 
 
     - Build the server, and host on Heroku. 
     - Create a Facebook App/Page, set up the webhook, get page token, and trigger the app. 
@@ -83,4 +83,4 @@ There ya go. You should be able to send messages to the chatbot, and see some in
 
 ![](Images/Samples.png)
 
-**Please let me know if you have any issues or if you have any suggestions for making this README better.**
+**Please let me know if you have any issues or if you have any suggestions for making this README better. If you thought a certain step was unclear, let me know and I'll try my best to edit the README and make any clarifications.**
