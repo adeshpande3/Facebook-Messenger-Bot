@@ -83,4 +83,4 @@ There ya go. You should be able to send messages to the chatbot, and see some in
 
 ![](Images/Samples.png)
 
-**Please let me know if you have any issues or if you have any suggestions for making this tutorial better.**
+**Please let me know if you have any issues or if you have any suggestions for making this README better.**
