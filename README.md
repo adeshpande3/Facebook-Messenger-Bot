@@ -79,4 +79,8 @@ In this app.py file, we want to create a route (/prediction in my case) where th
 
 There ya go. You should be able to send messages to the chatbot, and see some interesting responses that (hopefully) resemble yourelf in some way.
 
+## Samples
+
+![](Images/Samples.png)
+
 **Please let me know if you have any issues or if you have any suggestions for making this tutorial better.**
