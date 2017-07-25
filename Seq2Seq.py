@@ -26,6 +26,7 @@ def createTrainingMatrices(conversationFileName, wList, maxLen):
 		# Throw out sequences that are too long
 		if (keyCount > (maxLen - 1) or valueCount > (maxLen - 1)):
 			continue
+		# Integerize the encoder string
 		for keyIndex, word in enumerate(keySplit):
 			try:
 				encoderMessage[keyIndex] = wList.index(word)
@@ -33,6 +34,7 @@ def createTrainingMatrices(conversationFileName, wList, maxLen):
 				# TODO: This isnt really the right way to handle this scenario
 				encoderMessage[keyIndex] = 0
 		encoderMessage[keyIndex + 1] = wList.index('<EOS>')
+		# Integerize the decoder string
 		for valueIndex, word in enumerate(valueSplit):
 			try:
 				decoderMessage[valueIndex] = wList.index(word)
@@ -51,11 +53,12 @@ def getTrainingBatch(localXTrain, localYTrain, localBatchSize, maxLen):
 	num = randint(0,numTrainingExamples - localBatchSize - 1)
 	arr = localXTrain[num:num + localBatchSize]
 	labels = localYTrain[num:num + localBatchSize]
-	#arr, labels = shuffle(arr, labels, random_state=0)
+	# Reversing the order of encoder string apparently helps as per 2014 paper
 	reversedList = list(arr)
 	for index,example in enumerate(reversedList):
 		reversedList[index] = list(reversed(example))
 
+	# Lagged labels are for the training input into the decoder
 	laggedLabels = []
 	EOStokenIndex = wordList.index('<EOS>')
 	padTokenIndex = wordList.index('<pad>')
@@ -126,15 +129,16 @@ def idsToSentence(ids, wList):
 batchSize = 24
 maxEncoderLength = 15
 maxDecoderLength = maxEncoderLength
-lstmUnits = 48
+lstmUnits = 112
+embeddingDim = lstmUnits
 numLayersLSTM = 3
-numIterations = 250000
+numIterations = 500000
 
 # Loading in all the data structures
 with open("wordList.txt", "rb") as fp:
 	wordList = pickle.load(fp)
 
-wordVectors = np.load('embeddingIteration9000000.npy')
+wordVectors = np.load('embeddingMatrix.npy')
 vocabSize = len(wordList)
 wordVecDimensions = wordVectors.shape[1]
 
@@ -169,10 +173,13 @@ decoderLabels = [tf.placeholder(tf.int32, shape=(None,)) for i in range(maxDecod
 decoderInputs = [tf.placeholder(tf.int32, shape=(None,)) for i in range(maxDecoderLength)]
 feedPrevious = tf.placeholder(tf.bool)
 
-singleCell = tf.nn.rnn_cell.BasicLSTMCell(lstmUnits, state_is_tuple=True)
-encoderLSTM = tf.nn.rnn_cell.MultiRNNCell([singleCell]*numLayersLSTM, state_is_tuple=True)
+encoderLSTM = tf.nn.rnn_cell.BasicLSTMCell(lstmUnits, state_is_tuple=True)
+
+#encoderLSTM = tf.nn.rnn_cell.MultiRNNCell([singleCell]*numLayersLSTM, state_is_tuple=True)
+# Architectural choice of of whether or not to include ^
+
 decoderOutputs, decoderFinalState = tf.contrib.legacy_seq2seq.embedding_rnn_seq2seq(encoderInputs, decoderInputs, encoderLSTM, 
-															vocabSize, vocabSize, lstmUnits, feed_previous=feedPrevious)
+															vocabSize, vocabSize, embeddingDim, feed_previous=feedPrevious)
 
 decoderPrediction = tf.argmax(decoderOutputs, 2)
 
@@ -182,18 +189,21 @@ optimizer = tf.train.AdamOptimizer(1e-4).minimize(loss)
 
 sess = tf.Session()
 saver = tf.train.Saver()
+# If you're loading in a saved model, use the following
+#saver.restore(sess, tf.train.latest_checkpoint('models/'))
 sess.run(tf.global_variables_initializer())
 
+# Uploading results to Tensorboard
 tf.summary.scalar('Loss', loss)
 merged = tf.summary.merge_all()
 logdir = "tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "/"
 writer = tf.summary.FileWriter(logdir, sess.graph)
 
+# Some test strings that we'll use as input at intervals during training
 encoderTestStrings = ["whats up bro",
 					"hi",
 					"hey how are you",
 					"that girl was really cute tho",
-					"fuck you bro",
 					"that dodgers game was awesome"
 					]
 
@@ -224,5 +234,5 @@ for i in range(numIterations):
 		ids = (sess.run(decoderPrediction, feed_dict=feedDict))
 		print idsToSentence(ids, wordList)
 
-	if (i % 5000 == 0 and i != 0):
+	if (i % 10000 == 0 and i != 0):
 		savePath = saver.save(sess, "models/pretrained_seq2seq.ckpt", global_step=i)

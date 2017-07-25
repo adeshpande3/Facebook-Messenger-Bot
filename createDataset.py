@@ -12,6 +12,7 @@ linkedInData = input('Do you have LinkedIn data to parse through (y/n)?')
 def getGoogleHangoutsData():
 	# Putting all the file names in a list
 	allFiles = []
+	# Edit these file and directory names if you have them saved somewhere else
 	for filename in os.listdir('GoogleTextForm'):
 	    if filename.endswith(".txt"): 
 	        allFiles.append('GoogleTextForm/' + filename)
@@ -23,6 +24,7 @@ def getGoogleHangoutsData():
 		openedFile = open(currentFile, 'r') 
 		allLines = openedFile.readlines()
 	   	for index,lines in enumerate(allLines):
+	   		# The sender's name is separated by < and >
 	   	    leftBracket = lines.find('<')
 	   	    rightBracket = lines.find('>')
 	        
@@ -125,7 +127,9 @@ def getLinkedInData():
 def cleanMessage(message):
 	# Remove new lines within message
 	cleanedMessage = message.replace('\n',' ').lower()
+	# Deal with some weird tokens
 	cleanedMessage = cleanedMessage.replace("\xc2\xa0", "")
+	# Remove punctuation
 	cleanedMessage = re.sub('([.,!?])','', cleanedMessage)
 	# Remove multiple spaces in message
 	cleanedMessage = re.sub(' +',' ', cleanedMessage)
@@ -146,7 +150,7 @@ print 'Total len of dictionary', len(combinedDictionary)
 print 'Saving conversation data dictionary'
 np.save('conversationDictionary.npy', combinedDictionary)
 
-conversationFile = open('ConversationData.txt', 'w')
+conversationFile = open('conversationData.txt', 'w')
 for key,value in combinedDictionary.iteritems():
 	if (not key.strip() or not value.strip()):
 		# If there are empty strings

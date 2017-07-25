@@ -12,12 +12,18 @@ import os
 # https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality.pdf
 # It's a bit old, but Word2Vec is still SOTA and relatively simple, so I'm going with it
 
+# Check out Tensorflow's documentation which is pretty good for Word2Vec
+# https://www.tensorflow.org/tutorials/word2vec
+
 wordVecDimensions = 100
 batchSize = 128
 numNegativeSample = 64
 windowSize = 5
-numIterations = 10000000
+numIterations = 100000
 
+# This function just takes in the conversation data and makes it 
+# into one huge string, and then uses a Counter to identify words
+# and the number of occurences
 def processDataset(filename):
 	openedFile = open(filename, 'r')
 	allLines = openedFile.readlines()
@@ -50,6 +56,7 @@ def getTrainingBatch():
 	labels = yTrain[num:num + batchSize]
 	return arr, labels[:,np.newaxis]
 
+# Loading the data structures if they are present in the directory
 if (os.path.isfile('Word2VecXTrain.npy') and os.path.isfile('Word2VecYTrain.npy') and os.path.isfile('wordList.txt')):
 	xTrain = np.load('Word2VecXTrain.npy')
 	yTrain = np.load('Word2VecYTrain.npy')
@@ -59,7 +66,7 @@ if (os.path.isfile('Word2VecXTrain.npy') and os.path.isfile('Word2VecYTrain.npy'
 	print 'Finished loading word list'
 
 else:
-	fullCorpus, datasetDictionary = processDataset('ConversationData.txt')
+	fullCorpus, datasetDictionary = processDataset('conversationData.txt')
 	print 'Finished parsing and cleaning dataset'
 	wordList, xTrain, yTrain  = createTrainingMatrices(datasetDictionary, fullCorpus)
 	print 'Finished creating training matrices'
@@ -91,15 +98,12 @@ loss = tf.reduce_mean(
 
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=1.0).minimize(loss)
 
-# TODO only save one embedding matrix
-
 sess.run(tf.global_variables_initializer())
 for i in range(numIterations):
 	trainInputs, trainLabels = getTrainingBatch()
 	_, curLoss = sess.run([optimizer, loss], feed_dict={inputs: trainInputs, outputs: trainLabels})
 	if (i % 10000 == 0):
 		print ('Current loss is:', curLoss)
-	if (i % 1000000 == 0 and i != 0):
-		print 'Saving the word embedding matrix'
-		embedMatrix = embeddingMatrix.eval(session=sess)
-		np.save('embeddingIteration' + str(i) + '.npy', embedMatrix)
+print 'Saving the word embedding matrix'
+embedMatrix = embeddingMatrix.eval(session=sess)
+np.save('embeddingMatrix.npy', embedMatrix)
