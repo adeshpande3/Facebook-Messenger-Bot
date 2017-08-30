@@ -4,10 +4,10 @@ import os
 import re
 from datetime import datetime
 
-personName = input('Enter your full name: ')
-fbData = input('Do you have Facebook data to parse through (y/n)?')
-googleData = input('Do you have Google Hangouts data to parse through (y/n)?')
-linkedInData = input('Do you have LinkedIn data to parse through (y/n)?')
+personName = raw_input('Enter your full name: ')
+fbData = raw_input('Do you have Facebook data to parse through (y/n)?')
+googleData = raw_input('Do you have Google Hangouts data to parse through (y/n)?')
+linkedInData = raw_input('Do you have LinkedIn data to parse through (y/n)?')
 
 def getGoogleHangoutsData():
 	# Putting all the file names in a list
