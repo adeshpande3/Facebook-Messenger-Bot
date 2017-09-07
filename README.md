@@ -18,7 +18,7 @@ In order to run these scripts, you'll need the following libraries.
 
 1. Download and unzip [this entire repository from GitHub](https://github.com/adeshpande3/Facebook-Messenger-Bot), either interactively, or by entering the following in your Terminal.
     ```bash
-    git clone https://github.com/adeshpande3/Facebook-Messenger-Bot
+    git clone https://github.com/adeshpande3/Facebook-Messenger-Bot.git
     ```
 
 2. Navigate into the top directory of the repo on your machine
@@ -27,7 +27,12 @@ In order to run these scripts, you'll need the following libraries.
     ```
 3. Our first job is to download all of your conversation data from various social media sites. For me, I used Facebook, Google Hangouts, and LinkedIn. If you have other sites that you're getting data from, that's fine. You just will have to create a new method in [createDataset.py](https://github.com/adeshpande3/Facebook-Messenger-Bot/blob/master/createDataset.py). 
 
-* **Facebook Data**: Download your data from [here](https://www.facebook.com/help/131112897028467). Once downloaded, you should have a fairly large file called **messages.htm**. It'll be a pretty large file (over 190 MB for me). We're going to need to parse through this large file, and extract all of the conversations. To do this, we'll use this [tool](https://github.com/ownaginatious/fbchat-archive-parser) that Dillon Dixon has kindly open sourced. You'll clone his repository, and run:
+* **Facebook Data**: Download your data from [here](https://www.facebook.com/help/131112897028467). Once downloaded, you should have a fairly large file called **messages.htm**. It'll be a pretty large file (over 190 MB for me). We're going to need to parse through this large file, and extract all of the conversations. To do this, we'll use this [tool](https://github.com/ownaginatious/fbchat-archive-parser) that Dillon Dixon has kindly open sourced. You'll clone his repository,
+    ```bash
+    git clone https://github.com/ownaginatious/fbchat-archive-parser.git
+    cd fbchat-archive-parser
+    ```    
+and run:
     ```bash
     fbcap ./messages.htm > fbMessages.txt
     ```
