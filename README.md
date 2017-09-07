@@ -32,7 +32,7 @@ In order to run these scripts, you'll need the following libraries.
     git clone https://github.com/ownaginatious/fbchat-archive-parser.git
     cd fbchat-archive-parser
     ```    
-and run:
+    and run:
     ```bash
     fbcap ./messages.htm > fbMessages.txt
     ```
