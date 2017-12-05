@@ -51,7 +51,7 @@ In order to run these scripts, you'll need the following libraries.
     ```
     You'll then be prompted to enter your name (so that the script knows who to look for), and which social media sites you have data for. This script will create a file named **conversationDictionary.npy** which is a Numpy object that contains pairs in the form of (FRIENDS_MESSAGE, YOUR RESPONSE). A file named **conversationData.txt** will also be created. This is simply a large text file the dictionary data in a unified form. 
 
-5. Now that we have those 2 files, we can start creating our word vectors through a Word2Vec model. This step is a little different from the others. The Tensorflow function we see later on (in seq2seq.py) actually also handles the embedding part. So you can either decide to train your own vectors or have the seq2seq function do it jointly, which is what I ended up doing.** If you want to create your own word vectors though Word2Vec, say y at the prompt (after running the following). If you don't, then that's fine, reply n and this function will only create the wordList.txt. **
+5. Now that we have those 2 files, we can start creating our word vectors through a Word2Vec model. This step is a little different from the others. The Tensorflow function we see later on (in seq2seq.py) actually also handles the embedding part. So you can either decide to train your own vectors or have the seq2seq function do it jointly, which is what I ended up doing.**If you want to create your own word vectors though Word2Vec, say y at the prompt (after running the following). If you don't, then that's fine, reply n and this function will only create the wordList.txt.**
     ```bash
     python Word2Vec.py
     ```
