@@ -48,7 +48,7 @@ def createTrainingMatrices(dictionary, corpus):
 		for word in wordsAdded:
 			xTrain.append(allUniqueWords.index(allWords[i]))
 			yTrain.append(allUniqueWords.index(word))
-	return allUniqueWords, xTrain, yTrain
+	return xTrain, yTrain
 
 def getTrainingBatch():
 	num = randint(0,numTrainingExamples - batchSize - 1)
@@ -56,6 +56,7 @@ def getTrainingBatch():
 	labels = yTrain[num:num + batchSize]
 	return arr, labels[:,np.newaxis]
 
+continueWord2Vec = True
 # Loading the data structures if they are present in the directory
 if (os.path.isfile('Word2VecXTrain.npy') and os.path.isfile('Word2VecYTrain.npy') and os.path.isfile('wordList.txt')):
 	xTrain = np.load('Word2VecXTrain.npy')
@@ -68,13 +69,24 @@ if (os.path.isfile('Word2VecXTrain.npy') and os.path.isfile('Word2VecYTrain.npy'
 else:
 	fullCorpus, datasetDictionary = processDataset('conversationData.txt')
 	print 'Finished parsing and cleaning dataset'
-	wordList, xTrain, yTrain  = createTrainingMatrices(datasetDictionary, fullCorpus)
-	print 'Finished creating training matrices'
-	np.save('Word2VecXTrain.npy', xTrain)
-	np.save('Word2VecYTrain.npy', yTrain)
+	wordList = datasetDictionary.keys()
+	createOwnVectors = raw_input('Do you want to create your own vectors through Word2Vec (y/n)?')
+	if (createOwnVectors == 'y'):
+		xTrain, yTrain  = createTrainingMatrices(datasetDictionary, fullCorpus)
+		print 'Finished creating training matrices'
+		np.save('Word2VecXTrain.npy', xTrain)
+		np.save('Word2VecYTrain.npy', yTrain)
+	else:
+		continueWord2Vec = False
 	with open("wordList.txt", "wb") as fp: 
 		pickle.dump(wordList, fp)
 	
+# If you do not want to create your own word vectors and you'd just like to 
+# have Tensorflow's seq2seq take care of that, then you don't need to run 
+# anything below this line. 
+if (continueWord2Vec == False):
+	sys.exit()
+
 numTrainingExamples = len(xTrain)
 vocabSize = len(wordList)
 

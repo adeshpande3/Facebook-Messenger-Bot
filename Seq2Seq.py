@@ -138,16 +138,24 @@ numIterations = 500000
 with open("wordList.txt", "rb") as fp:
 	wordList = pickle.load(fp)
 
-wordVectors = np.load('embeddingMatrix.npy')
 vocabSize = len(wordList)
-wordVecDimensions = wordVectors.shape[1]
+
+# If you've run the entirety of word2vec.py then these lines will load in 
+# the embedding matrix.
+if (os.path.isfile('embeddingMatrix.npy'):
+	wordVectors = np.load('embeddingMatrix.npy')
+	wordVecDimensions = wordVectors.shape[1]
+else:
+	question = 'Since we cant find an embedding matrix, how many dimensions do you want your word vectors to be?: '
+	wordVecDimensions = int(input(question))
 
 # Add two entries to the word vector matrix. One to represent padding tokens, 
 # and one to represent an end of sentence token
 padVector = np.zeros((1, wordVecDimensions), dtype='int32')
 EOSVector = np.ones((1, wordVecDimensions), dtype='int32')
-wordVectors = np.concatenate((wordVectors,padVector), axis=0)
-wordVectors = np.concatenate((wordVectors,EOSVector), axis=0)
+if (os.path.isfile('embeddingMatrix.npy'): 
+	wordVectors = np.concatenate((wordVectors,padVector), axis=0)
+	wordVectors = np.concatenate((wordVectors,EOSVector), axis=0)
 
 # Need to modify the word list as well
 wordList.append('<pad>')
