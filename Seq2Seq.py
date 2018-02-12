@@ -23,8 +23,8 @@ def createTrainingMatrices(conversationFileName, wList, maxLen):
 		valueSplit = value.split()
 		keyCount = len(keySplit)
 		valueCount = len(valueSplit)
-		# Throw out sequences that are too long
-		if (keyCount > (maxLen - 1) or valueCount > (maxLen - 1)):
+		# Throw out sequences that are too long or are empty
+		if (keyCount > (maxLen - 1) or valueCount > (maxLen - 1) or valueCount == 0 or keyCount == 0):
 			continue
 		# Integerize the encoder string
 		for keyIndex, word in enumerate(keySplit):
