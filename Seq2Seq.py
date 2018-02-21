@@ -142,7 +142,7 @@ vocabSize = len(wordList)
 
 # If you've run the entirety of word2vec.py then these lines will load in 
 # the embedding matrix.
-if (os.path.isfile('embeddingMatrix.npy'):
+if (os.path.isfile('embeddingMatrix.npy')):
 	wordVectors = np.load('embeddingMatrix.npy')
 	wordVecDimensions = wordVectors.shape[1]
 else:
@@ -153,7 +153,7 @@ else:
 # and one to represent an end of sentence token
 padVector = np.zeros((1, wordVecDimensions), dtype='int32')
 EOSVector = np.ones((1, wordVecDimensions), dtype='int32')
-if (os.path.isfile('embeddingMatrix.npy'): 
+if (os.path.isfile('embeddingMatrix.npy')): 
 	wordVectors = np.concatenate((wordVectors,padVector), axis=0)
 	wordVectors = np.concatenate((wordVectors,EOSVector), axis=0)
 
