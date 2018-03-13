@@ -34,7 +34,7 @@ def processDataset(filename):
 	return myStr, finalDict
 
 def createTrainingMatrices(dictionary, corpus):
-	allUniqueWords = dictionary.keys()	
+	allUniqueWords = list(dictionary.keys())	
 	allWords = corpus.split()
 	numTotalWords = len(allWords)
 	xTrain=[]
@@ -69,7 +69,7 @@ if (os.path.isfile('Word2VecXTrain.npy') and os.path.isfile('Word2VecYTrain.npy'
 else:
 	fullCorpus, datasetDictionary = processDataset('conversationData.txt')
 	print 'Finished parsing and cleaning dataset'
-	wordList = datasetDictionary.keys()
+	wordList = list(datasetDictionary.keys())
 	createOwnVectors = raw_input('Do you want to create your own vectors through Word2Vec (y/n)?')
 	if (createOwnVectors == 'y'):
 		xTrain, yTrain  = createTrainingMatrices(datasetDictionary, fullCorpus)
