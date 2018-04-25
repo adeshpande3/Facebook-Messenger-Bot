@@ -44,6 +44,8 @@ In order to run these scripts, you'll need the following libraries.
     At the end of all this, you should have a directory structure that looks like this. Make sure you rename the folders and file names if yours are different. 
 
     ![](Images/DirectoryStructure.png)
+	
+* **WhatsApp Data**: Make sure you have a cell phone and put it in the US date-format if it is not already (this will be important later when you parse the log file to .csv). You can not use whatsApp web for this purpose. Open the chat you want to send, tap the menu button, tap more, then click "Email Chat". Send the email to yourself and download it to your computer. This will give you a .txt file, to parse it, we'll convert it to .cvs. To do this go to http://ocpl.com.bd/whatsapp_parser/ and enter all the text in your log file. Click export, download the csv file and simply store it in your Facebook-Messenger-Bot folder under the name "whatsapp_chats.csv".
 
 4. Now that we have all our conversation logs in a clean format, we can go ahead and create our dataset. In our directory, let's run:
     ```bash

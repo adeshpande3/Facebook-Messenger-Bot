@@ -8,6 +8,31 @@ personName = raw_input('Enter your full name: ')
 fbData = raw_input('Do you have Facebook data to parse through (y/n)?')
 googleData = raw_input('Do you have Google Hangouts data to parse through (y/n)?')
 linkedInData = raw_input('Do you have LinkedIn data to parse through (y/n)?')
+whatsAppData = raw_input('Do you have whatsAppData to parse through (y/n)?')
+
+def getWhatsAppData():
+        df = pd.read_csv('whatsapp_chats.csv')
+        responseDictionary = dict()
+        receivedMessages = df[df['From'] != personName]
+        sentMessages = df[df['From'] == personName]
+        combined = pd.concat([sentMessages, receivedMessages])
+        otherPersonsMessage, myMessage = "",""
+        firstMessage = True
+        for index, row in combined.iterrows():
+            if (row['From'] != personName):
+                if myMessage and otherPersonsMessage:
+                    otherPersonsMessage = cleanMessage(otherPersonsMessage)
+                    myMessage = cleanMessage(myMessage)
+                    responseDictionary[otherPersonsMessage.rstrip()] = myMessage.rstrip()
+                    otherPersonsMessage, myMessage = "",""
+                otherPersonsMessage = otherPersonsMessage + str(row['Content']) + " "
+            else:
+                if (firstMessage):
+                    firstMessage = False
+                    # Don't include if I am the person initiating the convo
+                    continue
+                myMessage = myMessage + str(row['Content']) + " "
+        return responseDictionary
 
 def getGoogleHangoutsData():
 	# Putting all the file names in a list
@@ -145,6 +170,9 @@ if (fbData == 'y'):
 if (linkedInData == 'y'):
 	print 'Getting LinkedIn Data'
 	combinedDictionary.update(getLinkedInData())
+if (whatsAppData == 'y')
+        print 'Getting whatsApp Data'
+        combinedDictionary.update(getWhatsAppData())
 print 'Total len of dictionary', len(combinedDictionary)
 
 print 'Saving conversation data dictionary'
