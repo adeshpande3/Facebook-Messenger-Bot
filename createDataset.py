@@ -170,7 +170,7 @@ if (fbData == 'y'):
 if (linkedInData == 'y'):
 	print 'Getting LinkedIn Data'
 	combinedDictionary.update(getLinkedInData())
-if (whatsAppData == 'y')
+if (whatsAppData == 'y'):
         print 'Getting whatsApp Data'
         combinedDictionary.update(getWhatsAppData())
 print 'Total len of dictionary', len(combinedDictionary)
