@@ -49,8 +49,8 @@ def getGoogleHangoutsData():
                                 # responses
     for currentFile in allFiles:
         myMessage, otherPersonsMessage, currentSpeaker = "","",""
-        openedFile = open(currentFile, 'r', encoding="utf-8")
-        allLines = openedFile.readlines()
+        with open(currentFile, 'r') as openedFile:
+            allLines = openedFile.readlines()
         for index,lines in enumerate(allLines):
             # The sender's name is separated by < and >
             leftBracket = lines.find('<')
@@ -90,8 +90,8 @@ def getGoogleHangoutsData():
 def getFacebookData():
     personName = raw_input('Enter your full Facebook name: ')
     responseDictionary = dict()
-    fbFile = open('fbMessages.txt', 'r', encoding="utf-8")
-    allLines = fbFile.readlines()
+    with open('fbMessages.txt', 'r') as fbFile:
+        allLines = fbFile.readlines()
     myMessage, otherPersonsMessage, currentSpeaker = "","",""
     for index,lines in enumerate(allLines):
         rightBracket = lines.find(']') + 2
@@ -172,8 +172,8 @@ def getDiscordData():
     # Going through each file, and recording everyone's messages to me, and my
                                 # responses
     for currentFile in allFiles:
-        openedFile = open(currentFile, 'r')
-        allLines = openedFile.readlines()
+        with open(currentFile, 'r') as openedFile:
+            allLines = openedFile.readlines()
         data = ''.join(allLines)
         otherPersonsMessage, myMessage = "",""
         response_sets = re.findall(r'\[.+\] (?!' + re.escape(personName) + r').+\n(.+)\n{2}(?:\[.+\] ' + re.escape(personName) + r'\n(.+)\n{2})', data)
@@ -217,17 +217,8 @@ print('Saving conversation data dictionary')
 np.save('conversationDictionary.npy', combinedDictionary)
 
 conversationFile = open('conversationData.txt', 'w')
-for key,value in combinedDictionary.iteritems():
-    if (not key.strip() or (isinstance(value, str) and not value.strip())):
+for key, value in combinedDictionary.items():
+    if (not key.strip() or not value.strip()):
         # If there are empty strings
         continue
-    if (isinstance(value, list)):
-        # This is for multiple responses in value - Currently happens in Discord
-        value = [response.strip() for response in value if response.strip()]
-        if not value:
-            continue
-        value = ','.join(value)
-    else:
-        value = value.strip()
-    key = key.strip()
     conversationFile.write(key.strip() + value.strip())
