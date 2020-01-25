@@ -154,7 +154,7 @@ def getLinkedInData():
                     myMessage = cleanMessage(myMessage)
                     responseDictionary[otherPersonsMessage.rstrip()] = myMessage.rstrip()
                     otherPersonsMessage, myMessage = "",""
-                otherPersonsMessage = otherPersonsMessage + row['Content'] + " "
+                otherPersonsMessage = otherPersonsMessage + str(row['Content']) + " "
             else:
                 if (firstMessage):
                     firstMessage = False
