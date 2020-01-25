@@ -44,9 +44,12 @@ def getGoogleHangoutsData():
         if filename.endswith(".txt"): 
             allFiles.append('GoogleTextForm/' + filename)
 
-    responseDictionary = dict() # The key is the other person's message, and the value is my response
-    # Going through each file, and recording everyone's messages to me, and my
-                                # responses
+    responseDictionary = dict() 
+    """
+        The key is the other person's message, and the value is my response
+        Going through each file, and recording everyone's messages to me, and my
+        responses
+    """
     for currentFile in allFiles:
         myMessage, otherPersonsMessage, currentSpeaker = "","",""
         with open(currentFile, 'r') as openedFile:
@@ -168,9 +171,12 @@ def getDiscordData():
     for filename in os.listdir('DiscordChatLogs'):
         if filename.endswith(".txt"): 
             allFiles.append('DiscordChatLogs/' + filename)
-    responseDictionary = dict() # The key is the other person's message, and the value is my response
-    # Going through each file, and recording everyone's messages to me, and my
-                                # responses
+    responseDictionary = dict()
+    """
+        The key is the other person's message, and the value is my response
+        Going through each file, and recording everyone's messages to me, and my
+        responses
+    """
     for currentFile in allFiles:
         with open(currentFile, 'r') as openedFile:
             allLines = openedFile.readlines()
