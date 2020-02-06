@@ -130,34 +130,34 @@ def getFacebookData():
 def getLinkedInData():
     personName = input('Enter your full LinkedIn name: ')
     df = pd.read_csv('Inbox.csv')
-    dateTimeConverter = lambda x: datetime.strptime(x,'%B %d, %Y, %I:%M %p')
+    dateTimeConverter = lambda x: datetime.fromisoformat(x)
     responseDictionary = dict()
-    peopleContacted = df['From'].unique().tolist()
+    peopleContacted = df['FROM'].unique().tolist()
     for person in peopleContacted:
-        receivedMessages = df[df['From'] == person]
-        sentMessages = df[df['To'] == person]
+        receivedMessages = df[df['FROM'] == person]
+        sentMessages = df[df['TO'] == person]
         if (len(sentMessages) == 0 or len(receivedMessages) == 0):
             # There was no actual conversation
             continue
         combined = pd.concat([sentMessages, receivedMessages])
-        combined['Date'] = combined['Date'].apply(dateTimeConverter)
-        combined = combined.sort(['Date'])
+        combined['DATE'] = combined['DATE'].apply(dateTimeConverter)
+        combined = combined.sort(['DATE'])
         otherPersonsMessage, myMessage = "",""
         firstMessage = True
         for index, row in combined.iterrows():
-            if (row['From'] != personName):
+            if (row['FROM'] != personName):
                 if myMessage and otherPersonsMessage:
                     otherPersonsMessage = cleanMessage(otherPersonsMessage)
                     myMessage = cleanMessage(myMessage)
                     responseDictionary[otherPersonsMessage.rstrip()] = myMessage.rstrip()
                     otherPersonsMessage, myMessage = "",""
-                otherPersonsMessage = otherPersonsMessage + row['Content'] + " "
+                otherPersonsMessage = otherPersonsMessage + str(row['CONTENT']) + " "
             else:
                 if (firstMessage):
                     firstMessage = False
                     # Don't include if I am the person initiating the convo
                     continue
-                myMessage = myMessage + str(row['Content']) + " "
+                myMessage = myMessage + str(row['CONTENT']) + " "
     return responseDictionary
 
 def getDiscordData():

@@ -4,3 +4,5 @@ GoogleTextForm/
 *.csv
 *.txt
 *.npy
+Dataset/
+.env*
