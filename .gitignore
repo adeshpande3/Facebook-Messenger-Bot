@@ -6,3 +6,5 @@ GoogleTextForm/
 *.npy
 Dataset/
 .env*
+.idea/
+__pycache__/
