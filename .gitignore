@@ -4,3 +4,4 @@ GoogleTextForm/
 *.csv
 *.txt
 *.npy
+.mypy_cache/
