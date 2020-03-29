@@ -1,4 +1,4 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import numpy as np
 import sys
 from random import randint
@@ -6,15 +6,23 @@ import datetime
 from sklearn.utils import shuffle
 import pickle
 import os
+
 # Removes an annoying Tensorflow warning
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
+# Disabling tensorflow 2.0 behavior for migration purposes
+# Following the official guide for migration
+# https://www.tensorflow.org/guide/migrate
+# Notice we import tensorflow.compat.v1 instead of just tensorflow
+# This is done to avoid changing every single function
+tf.disable_v2_behavior()
+
 def createTrainingMatrices(conversationFileName, wList, maxLen):
-    conversationDictionary = np.load(conversationFileName).item()
+    conversationDictionary = np.load(conversationFileName, allow_pickle = True).item()
     numExamples = len(conversationDictionary)
     xTrain = np.zeros((numExamples, maxLen), dtype='int32')
     yTrain = np.zeros((numExamples, maxLen), dtype='int32')
-    for index,(key,value) in enumerate(conversationDictionary.iteritems()):
+    for index,(key,value) in enumerate(conversationDictionary.items()):
         # Will store integerized representation of strings here (initialized as padding)
         encoderMessage = np.full((maxLen), wList.index('<pad>'), dtype='int32')
         decoderMessage = np.full((maxLen), wList.index('<pad>'), dtype='int32')
@@ -165,13 +173,13 @@ vocabSize = vocabSize + 2
 if (os.path.isfile('Seq2SeqXTrain.npy') and os.path.isfile('Seq2SeqYTrain.npy')):
     xTrain = np.load('Seq2SeqXTrain.npy')
     yTrain = np.load('Seq2SeqYTrain.npy')
-    print 'Finished loading training matrices'
+    print('Finished loading training matrices')
     numTrainingExamples = xTrain.shape[0]
 else:
     numTrainingExamples, xTrain, yTrain = createTrainingMatrices('conversationDictionary.npy', wordList, maxEncoderLength)
     np.save('Seq2SeqXTrain.npy', xTrain)
     np.save('Seq2SeqYTrain.npy', yTrain)
-    print 'Finished creating training matrices'
+    print('Finished creating training matrices')
 
 tf.reset_default_graph()
 
@@ -194,7 +202,6 @@ decoderPrediction = tf.argmax(decoderOutputs, 2)
 lossWeights = [tf.ones_like(l, dtype=tf.float32) for l in decoderLabels]
 loss = tf.contrib.legacy_seq2seq.sequence_loss(decoderOutputs, decoderLabels, lossWeights, vocabSize)
 optimizer = tf.train.AdamOptimizer(1e-4).minimize(loss)
-
 sess = tf.Session()
 saver = tf.train.Saver()
 # If you're loading in a saved model, uncomment the following line and comment out line 202
@@ -208,12 +215,12 @@ logdir = "tensorboard/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "/
 writer = tf.summary.FileWriter(logdir, sess.graph)
 
 # Some test strings that we'll use as input at intervals during training
-encoderTestStrings = ["whats up",
-					"hi",
-					"hey how are you",
-					"what are you up to",
-					"that dodgers game was awesome"
-					]
+encoderTestStrings = ["whats up bro",
+                    "hi",
+                    "hey how are you",
+                    "that girl was really cute tho",
+                    "that dodgers game was awesome"
+                    ]
 
 zeroVector = np.zeros((1), dtype='int32')
 
@@ -233,14 +240,14 @@ for i in range(numIterations):
         writer.add_summary(summary, i)
     if (i % 25 == 0 and i != 0):
         num = randint(0,len(encoderTestStrings) - 1)
-        print encoderTestStrings[num]
+        print(encoderTestStrings[num])
         inputVector = getTestInput(encoderTestStrings[num], wordList, maxEncoderLength);
         feedDict = {encoderInputs[t]: inputVector[t] for t in range(maxEncoderLength)}
         feedDict.update({decoderLabels[t]: zeroVector for t in range(maxDecoderLength)})
         feedDict.update({decoderInputs[t]: zeroVector for t in range(maxDecoderLength)})
         feedDict.update({feedPrevious: True})
         ids = (sess.run(decoderPrediction, feed_dict=feedDict))
-        print idsToSentence(ids, wordList)
+        print(idsToSentence(ids, wordList))
 
     if (i % 10000 == 0 and i != 0):
         savePath = saver.save(sess, "models/pretrained_seq2seq.ckpt", global_step=i)
