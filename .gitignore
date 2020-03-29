@@ -1,6 +1,4 @@
 # User specific files
-DiscordChatLogs/
-GoogleTextForm/
 .mypy_cache/
 *.csv
 *.txt
