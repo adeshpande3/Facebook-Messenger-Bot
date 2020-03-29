@@ -10,8 +10,7 @@ linkedInData = input('Do you have LinkedIn data to parse through (y/n)?')
 whatsAppData = input('Do you have whatsAppData to parse through (y/n)?')
 discordData = input('Do you have discordData to parse through (y/n)?')
 
-def getWhatsAppData():
-    personName = input('Enter your full WhatsApp name: ')
+def getWhatsAppDataCSV(personName):
     df = pd.read_csv('whatsapp_chats.csv')
     responseDictionary = dict()
     receivedMessages = df[df['From'] != personName]
@@ -35,6 +34,67 @@ def getWhatsAppData():
             myMessage = myMessage + str(row['Content']) + " "
     return responseDictionary
 
+def getWhatsAppDataTXT(personName):
+    # Putting all the file names in a list
+    allFiles = []
+    # Edit these file and directory names if you have them saved somewhere else
+    for filename in os.listdir('WhatsAppChatLogs'):
+        if filename.endswith(".txt"):
+            allFiles.append('WhatsAppChatLogs/' + filename)
+
+    responseDictionary = dict()
+    """
+        The key is the other person's message, and the value is my response
+        Going through each file, and recording everyone's messages to me, and my
+        responses
+    """
+    for currentFile in allFiles:
+        myMessage, otherPersonsMessage, currentSpeaker = "","",""
+        with open(currentFile, 'r', encoding='utf-8') as openedFile:
+            allLines = openedFile.readlines()
+        for index,lines in enumerate(allLines):
+            # The sender's name is separated by '] ' and ': ' (those whitespaces are important)
+            leftBracket = lines.find('] ')
+            rightColon = lines.find(': ')
+
+            # Find messages that I sent
+            if (lines[leftBracket + 2:rightColon] == personName):
+                if not myMessage:
+                    # Want to find the first message that I send (if I send
+                    # multiple in a row)
+                    startMessageIndex = index - 1
+                myMessage += lines[rightColon + 2:]
+
+            elif myMessage:
+                # Now go and see what message the other person sent by looking at
+                # previous messages
+                for counter in range(startMessageIndex, 0, -1):
+                    currentLine = allLines[counter]
+                    # In case the message above isn't in the right format
+                    if (currentLine.find('] ') < 0 or currentLine.find(': ') < 0):
+                        myMessage, otherPersonsMessage, currentSpeaker = "","",""
+                        break
+                    if not currentSpeaker:
+                        # The first speaker not named me
+                        currentSpeaker = currentLine[currentLine.find('] ') + 2:currentLine.find(': ')]
+                    elif (currentSpeaker != currentLine[currentLine.find('] ') + 2:currentLine.find(': ')]):
+                        # A different person started speaking, so now I know that
+                        # the first person's message is done
+                        otherPersonsMessage = cleanMessage(otherPersonsMessage)
+                        myMessage = cleanMessage(myMessage)
+                        responseDictionary[otherPersonsMessage] = myMessage
+                        break
+                    otherPersonsMessage = currentLine[currentLine.find(': ') + 2:] + otherPersonsMessage
+                myMessage, otherPersonsMessage, currentSpeaker = "","",""
+    return responseDictionary
+
+def getWhatsAppData():
+    personName = input('Enter your full WhatsApp name: ')
+    if os.path.isfile('whatsapp_chats.csv'):
+        return getWhatsAppDataCSV(personName)
+    else:
+        return getWhatsAppDataTXT(personName)
+
 def getGoogleHangoutsData():
     personName = input('Enter your full Hangouts name: ')
     # Putting all the file names in a list
@@ -55,7 +115,7 @@ def getGoogleHangoutsData():
             # The sender's name is separated by < and >
             leftBracket = lines.find('<')
             rightBracket = lines.find('>')
-            
+
             # Find messages that I sent
             if (lines[leftBracket + 1:rightBracket] == personName):
                 if not myMessage:
@@ -166,7 +226,7 @@ def getDiscordData():
     allFiles = []
     # Edit these file and directory names if you have them saved somewhere else
     for filename in os.listdir('DiscordChatLogs'):
-        if filename.endswith(".txt"): 
+        if filename.endswith(".txt"):
             allFiles.append('DiscordChatLogs/' + filename)
     responseDictionary = dict() # The key is the other person's message, and the value is my response
     # Going through each file, and recording everyone's messages to me, and my
