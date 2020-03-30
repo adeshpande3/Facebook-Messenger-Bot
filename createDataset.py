@@ -52,39 +52,46 @@ def getWhatsAppDataTXT(personName):
         myMessage, otherPersonsMessage, currentSpeaker = "","",""
         with open(currentFile, 'r') as openedFile:
             allLines = openedFile.readlines()
-        for index,lines in enumerate(allLines):
-            # The sender's name is separated by '] ' and ': ' (those whitespaces are important)
-            leftBracket = lines.find('] ')
-            rightColon = lines.find(': ')
+        for index,line in enumerate(allLines):
+            # The sender's name is separated by a ']' or '-' and a ': ' (The whitespace is important)
+            leftDelimPattern = re.compile(r'[\]\-]')
+            # A pattern to match either `]` or `-`
+            leftDelim = leftDelimPattern.search(line)
+            leftDelim = leftDelim.start() if leftDelim else -1
+            rightColon = line.find(': ')
 
             # Find messages that I sent
-            if (lines[leftBracket + 2:rightColon] == personName):
+            if (line[leftDelim + 1:rightColon].strip() == personName):
                 if not myMessage:
                     # Want to find the first message that I send (if I send
                     # multiple in a row)
                     startMessageIndex = index - 1
-                myMessage += lines[rightColon + 2:]
+                myMessage += line[rightColon + 1:].strip()
 
             elif myMessage:
                 # Now go and see what message the other person sent by looking at
                 # previous messages
                 for counter in range(startMessageIndex, 0, -1):
                     currentLine = allLines[counter]
-                    # In case the message above isn't in the right format
-                    if (currentLine.find('] ') < 0 or currentLine.find(': ') < 0):
+                    # Extracting the values of left and right delimiters
+                    leftDelim = leftDelimPattern.search(currentLine)
+                    leftDelim = leftDelim.start() if leftDelim else -1
+                    rightColon = line.find(': ')
+                    if (leftDelim < 0 or rightColon < 0):
+                        # In case the message above isn't in the right format
                         myMessage, otherPersonsMessage, currentSpeaker = "","",""
                         break
                     if not currentSpeaker:
                         # The first speaker not named me
-                        currentSpeaker = currentLine[currentLine.find('] ') + 2:currentLine.find(': ')]
-                    elif (currentSpeaker != currentLine[currentLine.find('] ') + 2:currentLine.find(': ')]):
+                        currentSpeaker = currentLine[leftDelim + 1:rightColon].strip()
+                    elif (currentSpeaker != currentLine[leftDelim + 1:rightColon].strip()):
                         # A different person started speaking, so now I know that
                         # the first person's message is done
                         otherPersonsMessage = cleanMessage(otherPersonsMessage)
                         myMessage = cleanMessage(myMessage)
                         responseDictionary[otherPersonsMessage] = myMessage
                         break
-                    otherPersonsMessage = currentLine[currentLine.find(': ') + 2:] + otherPersonsMessage
+                    otherPersonsMessage = currentLine[currentLine.find(': ') + 1:].strip() + otherPersonsMessage
                 myMessage, otherPersonsMessage, currentSpeaker = "","",""
     return responseDictionary
 
