@@ -91,7 +91,7 @@ def getWhatsAppDataTXT(personName):
                         myMessage = cleanMessage(myMessage)
                         responseDictionary[otherPersonsMessage] = myMessage
                         break
-                    otherPersonsMessage = currentLine[currentLine.find(': ') + 1:].strip() + otherPersonsMessage
+                    otherPersonsMessage = currentLine[rightColon + 1:].strip() + otherPersonsMessage
                 myMessage, otherPersonsMessage, currentSpeaker = "","",""
     return responseDictionary
 
