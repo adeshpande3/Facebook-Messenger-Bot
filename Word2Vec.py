@@ -1,4 +1,4 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import numpy as np
 import re
 from collections import Counter
@@ -21,12 +21,22 @@ numNegativeSample = 64
 windowSize = 5
 numIterations = 100000
 
+# Removes an annoying Tensorflow warning
+os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
+
+# Disabling tensorflow 2.0 behavior for migration purposes
+# Following the official guide for migration
+# https://www.tensorflow.org/guide/migrate
+# Notice we import tensorflow.compat.v1 instead of just tensorflow
+# This is done to avoid changing every single function
+tf.disable_v2_behavior()
+
 # This function just takes in the conversation data and makes it
 # into one huge string, and then uses a Counter to identify words
 # and the number of occurences
 def processDataset(filename):
-    openedFile = open(filename, 'r')
-    allLines = openedFile.readlines()
+    with open(filename, 'r', encoding='utf-8') as openedFile:
+        allLines = openedFile.readlines()
     myStr = ""
     for line in allLines:
         myStr += line
@@ -41,14 +51,16 @@ def createTrainingMatrices(dictionary, corpus):
     yTrain=[]
     for i in range(numTotalWords):
         if i % 100000 == 0:
-            print 'Finished %d/%d total words' % (i, numTotalWords)
+            print('Finished %d/%d total words' % (i, numTotalWords))
         wordsAfter = allWords[i + 1:i + windowSize + 1]
         wordsBefore = allWords[max(0, i - windowSize):i]
         wordsAdded = wordsAfter + wordsBefore
         for word in wordsAdded:
             xTrain.append(allUniqueWords.index(allWords[i]))
             yTrain.append(allUniqueWords.index(word))
-    return xTrain, yTrain
+    np.save('Word2VecXTrain.npy', xTrain)
+    np.save('Word2VecYTrain.npy', yTrain)
+    return np.load('Word2VecXTrain.npy'), np.load('Word2VecYTrain.npy')
 
 def getTrainingBatch():
     num = randint(0,numTrainingExamples - batchSize - 1)
@@ -61,21 +73,19 @@ continueWord2Vec = True
 if (os.path.isfile('Word2VecXTrain.npy') and os.path.isfile('Word2VecYTrain.npy') and os.path.isfile('wordList.txt')):
     xTrain = np.load('Word2VecXTrain.npy')
     yTrain = np.load('Word2VecYTrain.npy')
-    print 'Finished loading training matrices'
+    print('Finished loading training matrices')
     with open("wordList.txt", "rb") as fp:
         wordList = pickle.load(fp)
-    print 'Finished loading word list'
+    print('Finished loading word list')
 
 else:
     fullCorpus, datasetDictionary = processDataset('conversationData.txt')
-    print 'Finished parsing and cleaning dataset'
+    print('Finished parsing and cleaning dataset')
     wordList = list(datasetDictionary.keys())
-    createOwnVectors = raw_input('Do you want to create your own vectors through Word2Vec (y/n)?')
+    createOwnVectors = input('Do you want to create your own vectors through Word2Vec (y/n)?')
     if (createOwnVectors == 'y'):
         xTrain, yTrain  = createTrainingMatrices(datasetDictionary, fullCorpus)
-        print 'Finished creating training matrices'
-        np.save('Word2VecXTrain.npy', xTrain)
-        np.save('Word2VecYTrain.npy', yTrain)
+        print('Finished creating training matrices')
     else:
         continueWord2Vec = False
     with open("wordList.txt", "wb") as fp:
@@ -91,8 +101,8 @@ numTrainingExamples = len(xTrain)
 vocabSize = len(wordList)
 
 sess = tf.Session()
-embeddingMatrix = tf.Variable(tf.random_uniform([vocabSize, wordVecDimensions], -1.0, 1.0))
-nceWeights = tf.Variable(tf.truncated_normal([vocabSize, wordVecDimensions], stddev=1.0 / math.sqrt(wordVecDimensions)))
+embeddingMatrix = tf.Variable(tf.random.uniform([vocabSize, wordVecDimensions], -1.0, 1.0))
+nceWeights = tf.Variable(tf.random.truncated_normal([vocabSize, wordVecDimensions], stddev=1.0 / math.sqrt(wordVecDimensions)))
 nceBiases = tf.Variable(tf.zeros([vocabSize]))
 
 inputs = tf.placeholder(tf.int32, shape=[batchSize])
@@ -116,6 +126,6 @@ for i in range(numIterations):
     _, curLoss = sess.run([optimizer, loss], feed_dict={inputs: trainInputs, outputs: trainLabels})
     if (i % 10000 == 0):
         print ('Current loss is:', curLoss)
-print 'Saving the word embedding matrix'
+print('Saving the word embedding matrix')
 embedMatrix = embeddingMatrix.eval(session=sess)
 np.save('embeddingMatrix.npy', embedMatrix)

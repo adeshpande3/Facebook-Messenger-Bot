@@ -4,11 +4,11 @@ import os
 import re
 from datetime import datetime
 
-fbData = raw_input('Do you have Facebook data to parse through (y/n)?')
-googleData = raw_input('Do you have Google Hangouts data to parse through (y/n)?')
-linkedInData = raw_input('Do you have LinkedIn data to parse through (y/n)?')
-whatsAppData = raw_input('Do you have whatsAppData to parse through (y/n)?')
-discordData = raw_input('Do you have discordData to parse through (y/n)?')
+fbData = input('Do you have Facebook data to parse through (y/n)?')
+googleData = input('Do you have Google Hangouts data to parse through (y/n)?')
+linkedInData = input('Do you have LinkedIn data to parse through (y/n)?')
+whatsAppData = input('Do you have whatsAppData to parse through (y/n)?')
+discordData = input('Do you have discordData to parse through (y/n)?')
 
 def getWhatsAppDataCSV(personName):
     df = pd.read_csv('whatsapp_chats.csv')
@@ -50,7 +50,7 @@ def getWhatsAppDataTXT(personName):
     """
     for currentFile in allFiles:
         myMessage, otherPersonsMessage, currentSpeaker = "","",""
-        with open(currentFile, 'r') as openedFile:
+        with open(currentFile, 'r', encoding='utf-8') as openedFile:
             allLines = openedFile.readlines()
         for index,line in enumerate(allLines):
             # The sender's name is separated by a ']' or '-' and a ': ' (The whitespace is important)
@@ -96,7 +96,7 @@ def getWhatsAppDataTXT(personName):
     return responseDictionary
 
 def getWhatsAppData():
-    personName = raw_input('Enter your full WhatsApp name: ')
+    personName = input('Enter your full WhatsApp name: ')
     if os.path.isfile('whatsapp_chats.csv'):
         return getWhatsAppDataCSV(personName)
     else:
@@ -104,7 +104,7 @@ def getWhatsAppData():
 
 
 def getGoogleHangoutsData():
-    personName = raw_input('Enter your full Hangouts name: ')
+    personName = input('Enter your full Hangouts name: ')
     # Putting all the file names in a list
     allFiles = []
     # Edit these file and directory names if you have them saved somewhere else
@@ -120,7 +120,7 @@ def getGoogleHangoutsData():
     """
     for currentFile in allFiles:
         myMessage, otherPersonsMessage, currentSpeaker = "","",""
-        with open(currentFile, 'r') as openedFile:
+        with open(currentFile, 'r', encoding='utf-8') as openedFile:
             allLines = openedFile.readlines()
         for index,lines in enumerate(allLines):
             # The sender's name is separated by < and >
@@ -159,9 +159,9 @@ def getGoogleHangoutsData():
     return responseDictionary
 
 def getFacebookData():
-    personName = raw_input('Enter your full Facebook name: ')
+    personName = input('Enter your full Facebook name: ')
     responseDictionary = dict()
-    with open('fbMessages.txt', 'r') as fbFile:
+    with open('fbMessages.txt', 'r', encoding='utf-8') as fbFile:
         allLines = fbFile.readlines()
     myMessage, otherPersonsMessage, currentSpeaker = "","",""
     for index,lines in enumerate(allLines):
@@ -199,7 +199,7 @@ def getFacebookData():
     return responseDictionary
 
 def getLinkedInData():
-    personName = raw_input('Enter your full LinkedIn name: ')
+    personName = input('Enter your full LinkedIn name: ')
     df = pd.read_csv('Inbox.csv')
     dateTimeConverter = lambda x: datetime.strptime(x,'%B %d, %Y, %I:%M %p')
     responseDictionary = dict()
@@ -222,7 +222,7 @@ def getLinkedInData():
                     myMessage = cleanMessage(myMessage)
                     responseDictionary[otherPersonsMessage.rstrip()] = myMessage.rstrip()
                     otherPersonsMessage, myMessage = "",""
-                otherPersonsMessage = otherPersonsMessage + str(row['Content']) + " "
+                otherPersonsMessage = otherPersonsMessage + row['Content'] + " "
             else:
                 if (firstMessage):
                     firstMessage = False
@@ -232,7 +232,7 @@ def getLinkedInData():
     return responseDictionary
 
 def getDiscordData():
-    personName = raw_input('Enter your full Discord name: ')
+    personName = input('Enter your full Discord name: ')
     # Putting all the file names in a list
     allFiles = []
     # Edit these file and directory names if you have them saved somewhere else
@@ -246,7 +246,7 @@ def getDiscordData():
         responses
     """
     for currentFile in allFiles:
-        with open(currentFile, 'r') as openedFile:
+        with open(currentFile, 'r', encoding='utf-8') as openedFile:
             allLines = openedFile.readlines()
         data = ''.join(allLines)
         otherPersonsMessage, myMessage = "",""
@@ -271,26 +271,26 @@ def cleanMessage(message):
 
 combinedDictionary = {}
 if (googleData == 'y'):
-    print 'Getting Google Hangout Data'
+    print('Getting Google Hangout Data')
     combinedDictionary.update(getGoogleHangoutsData())
 if (fbData == 'y'):
-    print 'Getting Facebook Data'
+    print('Getting Facebook Data')
     combinedDictionary.update(getFacebookData())
 if (linkedInData == 'y'):
-    print 'Getting LinkedIn Data'
+    print('Getting LinkedIn Data')
     combinedDictionary.update(getLinkedInData())
 if (whatsAppData == 'y'):
-    print 'Getting whatsApp Data'
+    print('Getting whatsApp Data')
     combinedDictionary.update(getWhatsAppData())
 if (discordData == 'y'):
-    print 'Getting Discord Data'
+    print('Getting Discord Data')
     combinedDictionary.update(getDiscordData())
-print 'Total len of dictionary', len(combinedDictionary)
+print('Total len of dictionary ' + str(len(combinedDictionary)))
 
 print('Saving conversation data dictionary')
 np.save('conversationDictionary.npy', combinedDictionary)
 
-conversationFile = open('conversationData.txt', 'w')
+conversationFile = open('conversationData.txt', 'w', encoding='utf-8')
 for key, value in combinedDictionary.items():
     if (not key.strip() or not value.strip()):
         # If there are empty strings
