@@ -1,9 +1,7 @@
 # User specific files
-<<<<<<< HEAD
-.mypy_cache/
-=======
->>>>>>> 312a6701429267e30a62cf15f2db3f6b4f1b3ec8
 *.csv
 *.txt
 *.npy
 .mypy_cache/
+/botenv/
+**/__pycache__/
