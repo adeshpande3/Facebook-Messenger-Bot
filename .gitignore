@@ -5,3 +5,4 @@
 .mypy_cache/
 /botenv/
 **/__pycache__/
+.vscode/
