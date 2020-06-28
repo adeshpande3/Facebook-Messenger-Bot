@@ -7,6 +7,8 @@ from sklearn.utils import shuffle
 import pickle
 import os
 
+from embedding_rnn_seq2seq import embedding_rnn_seq2seq
+
 # Removes an annoying Tensorflow warning
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
@@ -207,9 +209,8 @@ encoderLSTM = tf.nn.rnn_cell.BasicLSTMCell(lstmUnits, state_is_tuple=True)
 #encoderLSTM = tf.nn.rnn_cell.MultiRNNCell([singleCell]*numLayersLSTM, state_is_tuple=True)
 # Architectural choice of of whether or not to include ^
 
-# This function does not exist - FIX
-decoderOutputs, decoderFinalState = tf.contrib.legacy_seq2seq.embedding_rnn_seq2seq(encoderInputs, decoderInputs, encoderLSTM,
-                                                                                    vocabSize, vocabSize, embeddingDim, feed_previous=feedPrevious)
+decoderOutputs, decoderFinalState = embedding_rnn_seq2seq(encoderInputs, decoderInputs, encoderLSTM,
+                                                          vocabSize, vocabSize, embeddingDim, feed_previous=feedPrevious)
 
 decoderPrediction = tf.argmax(decoderOutputs, 2)
 
