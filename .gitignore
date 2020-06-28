@@ -2,6 +2,9 @@
 *.csv
 *.txt
 *.npy
+# Don't ignore requirements
+!requirements.txt
+# Ignore cache and dev env specific files
 .mypy_cache/
 /botenv/
 **/__pycache__/
