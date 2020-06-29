@@ -8,6 +8,7 @@ import pickle
 import os
 
 from embedding_rnn_seq2seq import embedding_rnn_seq2seq
+from sequence_loss import sequence_loss
 
 # Removes an annoying Tensorflow warning
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
@@ -215,9 +216,7 @@ decoderOutputs, decoderFinalState = embedding_rnn_seq2seq(encoderInputs, decoder
 decoderPrediction = tf.argmax(decoderOutputs, 2)
 
 lossWeights = [tf.ones_like(l, dtype=tf.float32) for l in decoderLabels]
-# This function does not exist - FIX
-loss = tf.contrib.legacy_seq2seq.sequence_loss(
-    decoderOutputs, decoderLabels, lossWeights, vocabSize)
+loss = sequence_loss(decoderOutputs, decoderLabels, lossWeights, vocabSize)
 optimizer = tf.train.AdamOptimizer(1e-4).minimize(loss)
 sess = tf.Session()
 saver = tf.train.Saver()
