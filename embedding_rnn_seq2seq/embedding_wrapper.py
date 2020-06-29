@@ -1,3 +1,7 @@
+"""
+The following code is from https://github.com/tensorflow/tensorflow/blob/r1.14/tensorflow/contrib/rnn/python/ops/core_rnn_cell.py
+"""
+
 import math
 
 from tensorflow.compat.v1 import (variable_scope, get_variable_scope, get_variable, nest, matmul, constant, cond,

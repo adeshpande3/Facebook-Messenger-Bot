@@ -1,3 +1,7 @@
+"""
+The following code is from https://github.com/tensorflow/tensorflow/blob/r1.14/tensorflow/contrib/legacy_seq2seq/python/ops/seq2seq.py
+"""
+
 from tensorflow.compat.v1 import (
     add_n, cast, reduce_sum, name_scope, shape, reshape)
 from tensorflow.compat.v1.nn import (sparse_softmax_cross_entropy_with_logits)

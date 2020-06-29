@@ -1,3 +1,7 @@
+"""
+The following code is from https://github.com/tensorflow/tensorflow/blob/r1.14/tensorflow/contrib/legacy_seq2seq/python/ops/seq2seq.py
+"""
+
 import copy
 
 from tensorflow.compat.v1 import (
