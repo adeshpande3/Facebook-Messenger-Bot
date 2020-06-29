@@ -1,1 +1,1 @@
-from .rnn_funcs import embedding_rnn_seq2seq
+from .embedding_rnn_funcs import embedding_rnn_seq2seq
