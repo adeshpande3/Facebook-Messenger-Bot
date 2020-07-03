@@ -3,6 +3,7 @@ The following code is from https://github.com/tensorflow/tensorflow/blob/r1.14/t
 """
 
 import math
+from typing import Iterable
 
 from tensorflow.compat.v1 import (variable_scope, get_variable_scope, get_variable, nest, matmul, constant, cond,
                                   concat, dtypes, name_scope, device, random_uniform_initializer, reshape)
@@ -28,7 +29,7 @@ class _Linear(object):
   """
 
   def __init__(self,
-               args,
+               args: Iterable,
                output_size,
                build_bias,
                bias_initializer=None,

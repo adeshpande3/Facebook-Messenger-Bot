@@ -1,9 +1,7 @@
 import tensorflow.compat.v1 as tf
 import numpy as np
-import sys
 from random import randint
 import datetime
-from sklearn.utils import shuffle
 import pickle
 import os
 
