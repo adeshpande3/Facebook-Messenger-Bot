@@ -49,7 +49,18 @@ In order to run these scripts, you'll need the following libraries.
 
 * **WhatsApp Data**: Make sure you have a cell phone and put it in the US date-format if it is not already (this will be important later when you parse the log file to .csv). You can not use whatsApp web for this purpose. Open the chat you want to send, tap the menu button, tap more, then click "Email Chat". Send the email to yourself and download it to your computer. This will give you a .txt file, to parse it, we'll convert it to .csv. To do this go to [this link](http://ocpl.com.bd/whatsapp_parser/) and enter all the text in your log file. Click export, download the csv file and simply store it in your Facebook-Messenger-Bot folder under the name "whatsapp_chats.csv".
 
-  **NOTE**: The parser provided in the above link seems to have been removed. If you still have a `.csv` file *in the correct format*, you may still use that. Otherwise download your whatsapp chat logs as `.txt` files and put them all in a folder named `WhatsAppChatLogs` in the repo directory. `createDataset.py` will work with these files instead if, and only if, it **DOES NOT** find a `.csv` file named `whatsapp_chats.csv`
+  **NOTE**: The parser provided in the above link seems to have been removed. If you still have a `.csv` file *in the correct format*, you may still use that. Otherwise download your whatsapp chat logs as `.txt` files and put them all in a folder named `WhatsAppChatLogs` in the repo directory. `createDataset.py` will work with these files instead if, and only if, it **DOES NOT** find a `.csv` file named `whatsapp_chats.csv`.
+  
+    In case you use `.txt` chat logs, note that the expected format is-
+    ```
+    [20.06.19, 15:58:57] Loris: Welcome to the chat example
+    [20.06.19, 15:59:07] John: Thanks
+    ```
+    (OR)
+    ```
+    12/28/19, 21:43 - Loris: Welcome to the chat example
+    12/28/19, 21:43 - John: Thanks
+    ```
 
 4. Now that we have all our conversation logs in a clean format, we can go ahead and create our dataset. In our directory, let's run:
     ```bash
