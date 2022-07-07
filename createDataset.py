@@ -4,11 +4,11 @@ import os
 import re
 from datetime import datetime
 
-fbData = raw_input('Do you have Facebook data to parse through (y/n)?')
-googleData = raw_input('Do you have Google Hangouts data to parse through (y/n)?')
-linkedInData = raw_input('Do you have LinkedIn data to parse through (y/n)?')
-whatsAppData = raw_input('Do you have whatsAppData to parse through (y/n)?')
-discordData = raw_input('Do you have discordData to parse through (y/n)?')
+fbData = input('Do you have Facebook data to parse through (y/n)?')
+googleData = input('Do you have Google Hangouts data to parse through (y/n)?')
+linkedInData = input('Do you have LinkedIn data to parse through (y/n)?')
+whatsAppData = input('Do you have whatsAppData to parse through (y/n)?')
+discordData = input('Do you have discordData to parse through (y/n)?')
 
 def getWhatsAppDataCSV(personName):
     df = pd.read_csv('whatsapp_chats.csv')
@@ -96,7 +96,7 @@ def getWhatsAppDataTXT(personName):
     return responseDictionary
 
 def getWhatsAppData():
-    personName = raw_input('Enter your full WhatsApp name: ')
+    personName = input('Enter your full WhatsApp name: ')
     if os.path.isfile('whatsapp_chats.csv'):
         return getWhatsAppDataCSV(personName)
     else:
@@ -104,7 +104,7 @@ def getWhatsAppData():
 
 
 def getGoogleHangoutsData():
-    personName = raw_input('Enter your full Hangouts name: ')
+    personName = input('Enter your full Hangouts name: ')
     # Putting all the file names in a list
     allFiles = []
     # Edit these file and directory names if you have them saved somewhere else
@@ -159,7 +159,7 @@ def getGoogleHangoutsData():
     return responseDictionary
 
 def getFacebookData():
-    personName = raw_input('Enter your full Facebook name: ')
+    personName = input('Enter your full Facebook name: ')
     responseDictionary = dict()
     with open('fbMessages.txt', 'r') as fbFile:
         allLines = fbFile.readlines()
@@ -199,7 +199,7 @@ def getFacebookData():
     return responseDictionary
 
 def getLinkedInData():
-    personName = raw_input('Enter your full LinkedIn name: ')
+    personName = input('Enter your full LinkedIn name: ')
     df = pd.read_csv('Inbox.csv')
     dateTimeConverter = lambda x: datetime.strptime(x,'%B %d, %Y, %I:%M %p')
     responseDictionary = dict()
@@ -232,7 +232,7 @@ def getLinkedInData():
     return responseDictionary
 
 def getDiscordData():
-    personName = raw_input('Enter your full Discord name: ')
+    personName = input('Enter your full Discord name: ')
     # Putting all the file names in a list
     allFiles = []
     # Edit these file and directory names if you have them saved somewhere else
