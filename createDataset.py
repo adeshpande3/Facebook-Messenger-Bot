@@ -50,7 +50,7 @@ def getWhatsAppDataTXT(personName):
     """
     for currentFile in allFiles:
         myMessage, otherPersonsMessage, currentSpeaker = "","",""
-        with open(currentFile, 'r') as openedFile:
+        with open(currentFile, 'r',encoding="utf-8") as openedFile:
             allLines = openedFile.readlines()
         for index,line in enumerate(allLines):
             # The sender's name is separated by a ']' or '-' and a ': ' (The whitespace is important)
@@ -290,7 +290,7 @@ print 'Total len of dictionary', len(combinedDictionary)
 print('Saving conversation data dictionary')
 np.save('conversationDictionary.npy', combinedDictionary)
 
-conversationFile = open('conversationData.txt', 'w')
+conversationFile = open('conversationData.txt', 'w',encoding="utf-8")
 for key, value in combinedDictionary.items():
     if (not key.strip() or not value.strip()):
         # If there are empty strings
