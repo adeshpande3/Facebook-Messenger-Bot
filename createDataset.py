@@ -271,21 +271,21 @@ def cleanMessage(message):
 
 combinedDictionary = {}
 if (googleData == 'y'):
-    print 'Getting Google Hangout Data'
+    print ('Getting Google Hangout Data')
     combinedDictionary.update(getGoogleHangoutsData())
 if (fbData == 'y'):
-    print 'Getting Facebook Data'
+    print ('Getting Facebook Data')
     combinedDictionary.update(getFacebookData())
 if (linkedInData == 'y'):
-    print 'Getting LinkedIn Data'
+    print ('Getting LinkedIn Data')
     combinedDictionary.update(getLinkedInData())
 if (whatsAppData == 'y'):
-    print 'Getting whatsApp Data'
+    print ('Getting whatsApp Data')
     combinedDictionary.update(getWhatsAppData())
 if (discordData == 'y'):
-    print 'Getting Discord Data'
+    print ('Getting Discord Data')
     combinedDictionary.update(getDiscordData())
-print 'Total len of dictionary', len(combinedDictionary)
+print (Total len of dictionary', len(combinedDictionary))
 
 print('Saving conversation data dictionary')
 np.save('conversationDictionary.npy', combinedDictionary)
