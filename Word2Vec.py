@@ -25,7 +25,7 @@ numIterations = 100000
 # into one huge string, and then uses a Counter to identify words
 # and the number of occurences
 def processDataset(filename):
-    openedFile = open(filename, 'r')
+    openedFile = open(filename, 'r', encoding='utf-8')
     allLines = openedFile.readlines()
     myStr = ""
     for line in allLines:
