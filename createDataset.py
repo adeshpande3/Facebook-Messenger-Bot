@@ -287,6 +287,7 @@ if (discordData == 'y'):
     combinedDictionary.update(getDiscordData())
 print (Total len of dictionary', len(combinedDictionary))
 
+
 print('Saving conversation data dictionary')
 np.save('conversationDictionary.npy', combinedDictionary)
 
